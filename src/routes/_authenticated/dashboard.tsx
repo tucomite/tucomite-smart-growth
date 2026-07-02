@@ -48,7 +48,6 @@ const RECOMMENDATIONS: Recommendation[] = [
     headline: "Puedes ahorrar 1.240 € este mes cambiando dos proveedores",
     problem: "Estás pagando un 14% más que el precio medio de mercado en carnes y lácteos.",
     cause: "Tu proveedor actual no ha ajustado tarifas desde marzo, mientras la competencia bajó precios.",
-    solución: "" as never,
     solution: "Sustituir el proveedor de carnes por Cárnicas del Valle y renegociar lácteos con Central Láctea.",
     impact: "+1.240 € / mes",
     impactLabel: "impacto estimado",
