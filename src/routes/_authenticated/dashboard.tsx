@@ -331,7 +331,7 @@ function DashboardPage() {
                         key={i}
                         className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-200"
                       >
-                        <span className="w-6 h-6 rounded-full bg-[color:var(--tc-gold)]/12 text-[color:var(--tc-gold)] flex items-center justify-center shrink-0 mt-px">
+                        <span className="w-6 h-6 rounded-full bg-[color:var(--tc-gold)]/[0.12] text-[color:var(--tc-gold)] flex items-center justify-center shrink-0 mt-px">
                           <Sparkles className="w-3 h-3" />
                         </span>
                         <p className="text-[13px] text-white/80 leading-snug">{m}</p>
