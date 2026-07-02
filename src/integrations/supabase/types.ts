@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          record_id: string | null
+          restaurant_id: string | null
+          table_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          record_id?: string | null
+          restaurant_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          record_id?: string | null
+          restaurant_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       committee_activity: {
         Row: {
           created_at: string
@@ -161,6 +202,7 @@ export type Database = {
           chef_notes: string | null
           cost: number | null
           created_at: string
+          deleted_at: string | null
           description: string | null
           id: string
           labor_cost: number
@@ -181,6 +223,7 @@ export type Database = {
           chef_notes?: string | null
           cost?: number | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           labor_cost?: number
@@ -201,6 +244,7 @@ export type Database = {
           chef_notes?: string | null
           cost?: number | null
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           labor_cost?: number
@@ -231,6 +275,7 @@ export type Database = {
           alternative_supplier_id: string | null
           created_at: string
           current_price: number | null
+          deleted_at: string | null
           expiration_date: string | null
           id: string
           name: string
@@ -246,6 +291,7 @@ export type Database = {
           alternative_supplier_id?: string | null
           created_at?: string
           current_price?: number | null
+          deleted_at?: string | null
           expiration_date?: string | null
           id?: string
           name: string
@@ -261,6 +307,7 @@ export type Database = {
           alternative_supplier_id?: string | null
           created_at?: string
           current_price?: number | null
+          deleted_at?: string | null
           expiration_date?: string | null
           id?: string
           name?: string
@@ -382,6 +429,7 @@ export type Database = {
         Row: {
           cause: string | null
           created_at: string
+          deleted_at: string | null
           economic_impact: number | null
           id: string
           priority: string
@@ -396,6 +444,7 @@ export type Database = {
         Insert: {
           cause?: string | null
           created_at?: string
+          deleted_at?: string | null
           economic_impact?: number | null
           id?: string
           priority?: string
@@ -410,6 +459,7 @@ export type Database = {
         Update: {
           cause?: string | null
           created_at?: string
+          deleted_at?: string | null
           economic_impact?: number | null
           id?: string
           priority?: string
@@ -486,6 +536,7 @@ export type Database = {
         Row: {
           contact_name: string | null
           created_at: string
+          deleted_at: string | null
           delivery_time: string | null
           email: string | null
           id: string
@@ -498,6 +549,7 @@ export type Database = {
         Insert: {
           contact_name?: string | null
           created_at?: string
+          deleted_at?: string | null
           delivery_time?: string | null
           email?: string | null
           id?: string
@@ -510,6 +562,7 @@ export type Database = {
         Update: {
           contact_name?: string | null
           created_at?: string
+          deleted_at?: string | null
           delivery_time?: string | null
           email?: string | null
           id?: string
@@ -529,6 +582,38 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          restaurant_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restaurant_id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -536,10 +621,18 @@ export type Database = {
     Functions: {
       backfill_snapshots_30d: { Args: { rid: string }; Returns: undefined }
       current_restaurant_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _restaurant_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       refresh_daily_snapshot: { Args: { rid: string }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "owner" | "manager" | "kitchen" | "finance" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -666,6 +759,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["owner", "manager", "kitchen", "finance", "staff"],
+    },
   },
 } as const
