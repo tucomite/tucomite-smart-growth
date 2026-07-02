@@ -10,7 +10,7 @@ type Mode = "login" | "register" | "forgot";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
-    redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+    redirect: sanitizeRedirect(s.redirect),
     mode: (s.mode === "register" || s.mode === "forgot" ? s.mode : "login") as Mode,
   }),
   head: () => ({
