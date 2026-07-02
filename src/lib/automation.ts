@@ -289,7 +289,7 @@ export async function runAutomations(ctx: Ctx): Promise<{ created: number; skipp
         title: d.title,
         detail: d.detail,
         reason: d.reason,
-        payload: d.payload,
+        payload: d.payload as never,
         dedupe_key: d.dedupe,
         applied_at: mode === "auto" ? new Date().toISOString() : null,
       });
@@ -383,7 +383,7 @@ export async function duplicateTask(task: AutomationTask) {
     title: `${task.title} (copia)`,
     detail: task.detail,
     reason: `Duplicada de tarea original`,
-    payload: task.payload,
+    payload: task.payload as never,
     dedupe_key: `${task.dedupe_key ?? task.id}:dup:${stamp}`,
   });
 }
