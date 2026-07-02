@@ -236,6 +236,64 @@ function DishDetailPage() {
       unit: r.ingredients?.unit ?? "",
     }));
 
+  // Demo ingredient rows when the dish has none linked yet (dev fallback).
+  const demoIngredients = [
+    { name: "Ingrediente base", quantity: 0.2, unit: "kg", unitPrice: 6.8, supplier: "Distribuciones Mediterráneo" },
+    { name: "Aceite oliva virgen extra", quantity: 0.03, unit: "L", unitPrice: 6.8, supplier: "Distribuciones Mediterráneo" },
+    { name: "Ajo fresco", quantity: 0.01, unit: "kg", unitPrice: 3.2, supplier: "Distribuciones Mediterráneo" },
+    { name: "Especias de la casa", quantity: 0.005, unit: "kg", unitPrice: 24.0, supplier: "Bodega Ribera" },
+  ];
+
+  const ingredientRows =
+    ings.length > 0
+      ? ings.map((r) => {
+          const q = Number(r.quantity ?? 0);
+          const price = Number(r.ingredients?.current_price ?? 0);
+          return {
+            name: r.ingredients?.name ?? "—",
+            quantity: q,
+            unit: r.ingredients?.unit ?? "",
+            unitPrice: price,
+            total: q * price,
+            supplier:
+              suppliers.get(r.ingredients?.supplier_id ?? "")?.name ?? "Sin proveedor",
+            demo: false,
+          };
+        })
+      : demoIngredients.map((r) => ({
+          name: r.name,
+          quantity: r.quantity,
+          unit: r.unit,
+          unitPrice: r.unitPrice,
+          total: r.quantity * r.unitPrice,
+          supplier: r.supplier,
+          demo: true,
+        }));
+
+  // Impacto total esperado
+  const currentRevenue = Number(dish.sale_price ?? 0) * monthlySales;
+  const estimatedPrice = Math.max(
+    Number(dish.recommended_price ?? 0),
+    Number(dish.sale_price ?? 0),
+  );
+  const estimatedRevenue = estimatedPrice * monthlySales;
+  const monthlyIncrease = Math.max(0, estimatedRevenue - currentRevenue) + potentialSavings * monthlySales;
+  const investment = 49; // coste único auditoría
+  const roiMonths = monthlyIncrease > 0 ? investment / monthlyIncrease : null;
+
+  // Marketing insights derivados de datos
+  const popularity = Number(dish.popularity ?? 0);
+  const avgTicket = Number(dish.sale_price ?? 0);
+  const bestSlot =
+    popularity >= 75 ? "Cenas 20:30 – 22:30" : popularity >= 45 ? "Comidas 13:30 – 15:00" : "Fines de semana";
+  const repeatProb = Math.min(95, Math.round(40 + popularity * 0.5));
+  const marketingRecommendation =
+    currentM < targetM - 10
+      ? `Reposicionar como producto premium: subir ${currency.format(Math.max(1, estimatedPrice - Number(dish.sale_price ?? 0)))} y destacar procedencia del producto.`
+      : popularity >= 70
+        ? `Alta demanda: crear maridaje sugerido (+${currency.format(4.5)} ticket medio) y visibilizar en primera página de la carta.`
+        : `Empujar en franja ${bestSlot.toLowerCase()} con oferta cruzada de entrante para elevar ticket medio.`;
+
   return (
     <AppShell
       eyebrow={
