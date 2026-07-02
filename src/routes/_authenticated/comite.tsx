@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
 import { toast } from "sonner";
+import { AutomationCenter } from "@/components/app/AutomationCenter";
 
 export const Route = createFileRoute("/_authenticated/comite")({
   head: () => ({ meta: [{ title: "Comité IA — TuComité" }] }),
@@ -40,6 +41,11 @@ type Ingredient = {
   alternative_price: number | null;
 };
 type Supplier = { id: string; name: string; rating: number | null };
+type Ingredient2 = Ingredient & {
+  unit: string | null;
+  supplier_id: string | null;
+  alternative_supplier_id: string | null;
+};
 
 type ExpertKey = "chef" | "finance" | "purchasing" | "stock" | "marketing";
 type ExpertNote = {
@@ -87,6 +93,7 @@ function ComitePage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [ingredientsExt, setIngredientsExt] = useState<Ingredient2[]>([]);
   const [objective, setObjective] = useState("");
   const [deliberating, setDeliberating] = useState(false);
   const [revealed, setRevealed] = useState<number>(0);
@@ -114,12 +121,13 @@ function ComitePage() {
           .eq("restaurant_id", rid),
         supabase
           .from("ingredients")
-          .select("id,name,current_price,stock_quantity,expiration_date,alternative_price")
+          .select("id,name,current_price,stock_quantity,expiration_date,alternative_price,unit,supplier_id,alternative_supplier_id")
           .eq("restaurant_id", rid),
         supabase.from("suppliers").select("id,name,rating").eq("restaurant_id", rid),
       ]);
       setDishes((d.data ?? []) as Dish[]);
       setIngredients((i.data ?? []) as Ingredient[]);
+      setIngredientsExt((i.data ?? []) as Ingredient2[]);
       setSuppliers((s.data ?? []) as Supplier[]);
     })();
   }, []);
@@ -415,6 +423,17 @@ function ComitePage() {
               })}
             </div>
           </section>
+        )}
+
+        {restaurantId && (
+          <AutomationCenter
+            data={{
+              restaurantId,
+              dishes,
+              ingredients: ingredientsExt,
+              suppliers,
+            }}
+          />
         )}
       </div>
     </AppShell>

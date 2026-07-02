@@ -55,6 +55,141 @@ export type Database = {
           },
         ]
       }
+      automation_rules: {
+        Row: {
+          action_config: Json
+          action_type: string
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          last_run_at: string | null
+          name: string
+          restaurant_id: string
+          runs_count: number
+          trigger_config: Json
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          action_config?: Json
+          action_type: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          name: string
+          restaurant_id: string
+          runs_count?: number
+          trigger_config?: Json
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          action_config?: Json
+          action_type?: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          name?: string
+          restaurant_id?: string
+          runs_count?: number
+          trigger_config?: Json
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_rules_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automation_tasks: {
+        Row: {
+          applied_at: string | null
+          created_at: string
+          dedupe_key: string | null
+          detail: string | null
+          id: string
+          mode: string
+          payload: Json
+          reason: string | null
+          recommendation_id: string | null
+          restaurant_id: string
+          reverted_at: string | null
+          rule_id: string | null
+          scheduled_for: string | null
+          state: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          id?: string
+          mode?: string
+          payload?: Json
+          reason?: string | null
+          recommendation_id?: string | null
+          restaurant_id: string
+          reverted_at?: string | null
+          rule_id?: string | null
+          scheduled_for?: string | null
+          state?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          detail?: string | null
+          id?: string
+          mode?: string
+          payload?: Json
+          reason?: string | null
+          recommendation_id?: string | null
+          restaurant_id?: string
+          reverted_at?: string | null
+          rule_id?: string | null
+          scheduled_for?: string | null
+          state?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_tasks_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_tasks_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_tasks_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       committee_activity: {
         Row: {
           created_at: string
@@ -83,6 +218,91 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "committee_activity_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      committee_briefs: {
+        Row: {
+          body: string | null
+          brief_date: string
+          created_at: string
+          headline: string
+          id: string
+          metrics: Json
+          period: string
+          restaurant_id: string
+        }
+        Insert: {
+          body?: string | null
+          brief_date: string
+          created_at?: string
+          headline: string
+          id?: string
+          metrics?: Json
+          period: string
+          restaurant_id: string
+        }
+        Update: {
+          body?: string | null
+          brief_date?: string
+          created_at?: string
+          headline?: string
+          id?: string
+          metrics?: Json
+          period?: string
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "committee_briefs_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      committee_log: {
+        Row: {
+          action: string
+          actor: string
+          created_at: string
+          id: string
+          reason: string | null
+          restaurant_id: string
+          result: Json
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          restaurant_id: string
+          result?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          restaurant_id?: string
+          result?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "committee_log_restaurant_id_fkey"
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
@@ -387,6 +607,50 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          restaurant_id: string
+          severity: string
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          restaurant_id: string
+          severity?: string
+          title: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          restaurant_id?: string
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -427,6 +691,8 @@ export type Database = {
       }
       recommendations: {
         Row: {
+          automation_mode: string | null
+          automation_state: string | null
           cause: string | null
           created_at: string
           deleted_at: string | null
@@ -435,6 +701,7 @@ export type Database = {
           priority: string
           problem: string | null
           restaurant_id: string
+          scheduled_for: string | null
           solution: string | null
           status: string
           time_impact: string | null
@@ -442,6 +709,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          automation_mode?: string | null
+          automation_state?: string | null
           cause?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -450,6 +719,7 @@ export type Database = {
           priority?: string
           problem?: string | null
           restaurant_id: string
+          scheduled_for?: string | null
           solution?: string | null
           status?: string
           time_impact?: string | null
@@ -457,6 +727,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          automation_mode?: string | null
+          automation_state?: string | null
           cause?: string | null
           created_at?: string
           deleted_at?: string | null
@@ -465,6 +737,7 @@ export type Database = {
           priority?: string
           problem?: string | null
           restaurant_id?: string
+          scheduled_for?: string | null
           solution?: string | null
           status?: string
           time_impact?: string | null
