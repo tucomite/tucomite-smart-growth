@@ -140,9 +140,9 @@ function DashboardPage() {
         </span>
       }
     >
-      <div className="px-6 sm:px-10 lg:px-14 py-10 sm:py-14 max-w-6xl mx-auto">
+      <div className="px-6 sm:px-12 lg:px-16 py-14 sm:py-20 max-w-6xl mx-auto">
         {/* Greeting + Mode */}
-        <div className="flex items-start justify-between gap-6 mb-10 flex-wrap">
+        <div className="flex items-start justify-between gap-6 mb-16 flex-wrap">
           <motion.section
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -152,10 +152,10 @@ function DashboardPage() {
             <p className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--tc-gold)] font-medium">
               {restaurantName || "Tu restaurante"} · Informe ejecutivo
             </p>
-            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] text-white mt-4 tracking-tight leading-[1.02]">
+            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[60px] text-white mt-5 tracking-[-0.022em] leading-[1.02]">
               Buenos días{firstName ? `, ${firstName}` : ""}.
             </h1>
-            <p className="text-white/55 text-[15px] mt-4 max-w-xl leading-relaxed">
+            <p className="text-white/60 text-[15.5px] mt-5 max-w-xl leading-relaxed">
               El Comité ha terminado el análisis nocturno. Este es el estado de tu operación ahora mismo.
             </p>
           </motion.section>
@@ -172,9 +172,9 @@ function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.4 }}
-              className="rounded-3xl border border-white/[0.06] bg-[color:var(--tc-surface-2)] p-1"
+              className="rounded-3xl border border-white/[0.05] bg-[color:var(--tc-surface-2)] p-1"
             >
-              <div className="rounded-[22px] bg-[color:var(--cream)] p-6 sm:p-8">
+              <div className="rounded-[22px] bg-[color:var(--cream)] p-8 sm:p-10">
                 <DirectorSummary ctx={ctx} />
               </div>
             </motion.div>
@@ -185,7 +185,7 @@ function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.4 }}
-              className="space-y-10"
+              className="space-y-16"
             >
               {/* Live pulses */}
               {pulses.length > 0 && (
@@ -214,29 +214,29 @@ function DashboardPage() {
               )}
 
               {/* Hero: Health + Night report */}
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-6">
                 {/* Health card */}
                 <motion.section
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.1 }}
-                  className="relative rounded-3xl border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.015] backdrop-blur-xl p-7 sm:p-8 overflow-hidden group"
+                  className="relative rounded-3xl border border-white/[0.05] bg-gradient-to-b from-white/[0.035] to-white/[0.008] backdrop-blur-xl p-9 sm:p-11 overflow-hidden group shadow-[var(--tc-shadow-md)]"
                 >
-                  <div className="absolute -top-32 -left-24 w-72 h-72 rounded-full bg-[color:var(--tc-gold)]/[0.08] blur-3xl pointer-events-none" />
-                  <div className="relative flex items-start justify-between mb-5">
+                  <div className="absolute -top-40 -left-28 w-[420px] h-[420px] rounded-full bg-[color:var(--tc-gold)]/[0.07] blur-[80px] pointer-events-none" />
+                  <div className="relative flex items-start justify-between mb-8">
                     <div>
-                      <p className="text-[10.5px] uppercase tracking-[0.22em] text-white/40">
+                      <p className="text-[10.5px] uppercase tracking-[0.24em] text-[color:var(--tc-gold)] font-medium">
                         Salud del restaurante
                       </p>
-                      <p className="text-[13px] text-white/55 mt-2 max-w-xs leading-relaxed">
+                      <p className="text-[13.5px] text-white/60 mt-3 max-w-sm leading-relaxed">
                         {health.summary}
                       </p>
                     </div>
                     <TrendChip delta={health.delta} label="vs 7d" />
                   </div>
-                  <div className="relative flex items-center gap-8 flex-wrap">
+                  <div className="relative flex items-center gap-10 flex-wrap">
                     <HealthRing score={health.score} state={health.state} />
-                    <div className="flex-1 min-w-[180px] space-y-3">
+                    <div className="flex-1 min-w-[200px] space-y-4">
                       {health.pillars.map((p) => (
                         <PillarRow key={p.key} label={p.label} score={p.score} delta={p.delta} />
                       ))}
@@ -249,7 +249,7 @@ function DashboardPage() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.15 }}
-                  className="relative rounded-3xl border border-[color:var(--tc-gold)]/15 bg-[#0d0d10] p-7 sm:p-8 overflow-hidden"
+                  className="relative rounded-3xl border border-[color:var(--tc-gold)]/15 bg-[#0d0d10] p-9 sm:p-10 overflow-hidden shadow-[var(--tc-shadow-md)]"
                 >
                   <div className="absolute inset-0 pointer-events-none opacity-70">
                     <svg
@@ -272,13 +272,16 @@ function DashboardPage() {
                     </svg>
                   </div>
                   <div className="relative">
-                    <p className="text-[10.5px] uppercase tracking-[0.22em] text-[color:var(--tc-gold)] flex items-center gap-2">
-                      <Moon className="w-3.5 h-3.5" /> Mientras dormías…
+                    <p className="text-[10.5px] uppercase tracking-[0.24em] text-[color:var(--tc-gold)] flex items-center gap-2 font-medium">
+                      <Moon className="w-3.5 h-3.5" strokeWidth={1.75} /> Mientras dormías
                     </p>
-                    <h2 className="font-heading text-2xl sm:text-[26px] tracking-tight mt-3 leading-tight text-white max-w-xs">
-                      El Comité trabajó durante la noche.
+                    <h2 className="font-heading text-[28px] sm:text-[30px] tracking-[-0.018em] mt-4 leading-[1.1] text-white max-w-sm">
+                      El Comité trabajó durante la noche por ti.
                     </h2>
-                    <ul className="mt-6 space-y-2.5">
+                    <p className="text-[13px] text-white/55 mt-3 leading-relaxed max-w-sm">
+                      5 expertos analizaron tu operación mientras el restaurante descansaba.
+                    </p>
+                    <ul className="mt-7 space-y-3">
                       {night.lines.map((line, i) => {
                         const Icon = line.icon;
                         return (
@@ -286,23 +289,23 @@ function DashboardPage() {
                             key={i}
                             initial={{ opacity: 0, x: -6 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.25 + i * 0.06 }}
-                            className="flex items-start gap-2.5 text-[13px] text-white/75"
+                            transition={{ delay: 0.25 + i * 0.06, duration: 0.2 }}
+                            className="flex items-start gap-3 text-[13.5px] text-white/80"
                           >
-                            <span className="w-6 h-6 rounded-md bg-white/[0.04] flex items-center justify-center shrink-0 mt-px text-[color:var(--tc-gold)]">
-                              <Icon className="w-3.5 h-3.5" />
+                            <span className="w-7 h-7 rounded-lg bg-[color:var(--tc-gold)]/[0.08] border border-[color:var(--tc-gold)]/15 flex items-center justify-center shrink-0 text-[color:var(--tc-gold)]">
+                              <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
                             </span>
-                            <span className="leading-snug pt-0.5">{line.text}</span>
+                            <span className="leading-relaxed pt-0.5">{line.text}</span>
                           </motion.li>
                         );
                       })}
                     </ul>
-                    <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between">
-                      <span className="inline-flex items-center gap-2 text-[12px] text-white/50">
-                        <Clock className="w-3.5 h-3.5 text-[color:var(--tc-gold)]" />
-                        Tiempo ahorrado
+                    <div className="mt-8 pt-5 border-t border-white/[0.06] flex items-center justify-between">
+                      <span className="inline-flex items-center gap-2 text-[11.5px] uppercase tracking-[0.16em] text-white/50">
+                        <Clock className="w-3.5 h-3.5 text-[color:var(--tc-gold)]" strokeWidth={1.75} />
+                        Tiempo que te ahorramos
                       </span>
-                      <span className="font-heading text-xl text-white tracking-tight tabular-nums">
+                      <span className="font-heading text-[26px] text-white tracking-[-0.02em] tabular-nums leading-none">
                         {night.timeSaved}
                       </span>
                     </div>
@@ -317,24 +320,24 @@ function DashboardPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
                 >
-                  <div className="flex items-baseline justify-between mb-4">
-                    <h2 className="font-heading text-xl text-white tracking-tight">
+                  <div className="flex items-baseline justify-between mb-6">
+                    <h2 className="font-heading text-[22px] text-white tracking-[-0.014em]">
                       Memoria del Comité
                     </h2>
                     <span className="text-[10.5px] uppercase tracking-[0.18em] text-white/35">
                       últimos 7 días
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {memory.map((m, i) => (
                       <div
                         key={i}
-                        className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-200"
+                        className="rounded-xl bg-white/[0.02] px-5 py-4 flex items-start gap-3 hover:bg-white/[0.035] transition-all duration-200"
                       >
-                        <span className="w-6 h-6 rounded-full bg-[color:var(--tc-gold)]/[0.12] text-[color:var(--tc-gold)] flex items-center justify-center shrink-0 mt-px">
-                          <Sparkles className="w-3 h-3" />
+                        <span className="w-6 h-6 rounded-full bg-[color:var(--tc-gold)]/[0.10] text-[color:var(--tc-gold)] flex items-center justify-center shrink-0 mt-px">
+                          <Sparkles className="w-3 h-3" strokeWidth={1.75} />
                         </span>
-                        <p className="text-[13px] text-white/80 leading-snug">{m}</p>
+                        <p className="text-[13.5px] text-white/80 leading-relaxed">{m}</p>
                       </div>
                     ))}
                   </div>
@@ -343,13 +346,16 @@ function DashboardPage() {
 
               {/* Recommendations */}
               <section>
-                <div className="flex items-baseline justify-between mb-5">
+                <div className="flex items-baseline justify-between mb-8">
                   <div>
-                    <h2 className="font-heading text-2xl text-white tracking-tight">
+                    <p className="text-[10.5px] uppercase tracking-[0.22em] text-[color:var(--tc-gold)] font-medium mb-2">
+                      Informes del Comité
+                    </p>
+                    <h2 className="font-heading text-[28px] text-white tracking-[-0.018em]">
                       Decisiones sugeridas
                     </h2>
-                    <p className="text-[12.5px] text-white/45 mt-1">
-                      Ejecutivas. Cada una preparada por un experto del Comité.
+                    <p className="text-[13.5px] text-white/50 mt-2 max-w-md leading-relaxed">
+                      Cada informe está preparado por un experto del Comité y priorizado por impacto.
                     </p>
                   </div>
                   <span className="text-[10.5px] uppercase tracking-[0.18em] text-white/35">
@@ -357,20 +363,20 @@ function DashboardPage() {
                   </span>
                 </div>
                 {loading ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
-                        className="h-32 rounded-2xl border border-white/[0.06] bg-white/[0.02] animate-pulse"
+                        className="h-32 rounded-2xl bg-white/[0.02] animate-pulse"
                       />
                     ))}
                   </div>
                 ) : recommendations.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] p-10 text-center text-white/55">
+                  <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.015] p-14 text-center text-white/55">
                     El Comité aún no ha generado recomendaciones.
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {recommendations.map((rec, i) => (
                       <RecommendationCard
                         key={rec.id}
@@ -392,8 +398,8 @@ function DashboardPage() {
 
               {/* Timeline */}
               <section>
-                <div className="flex items-baseline justify-between mb-4">
-                  <h2 className="font-heading text-xl text-white tracking-tight">
+                <div className="flex items-baseline justify-between mb-6">
+                  <h2 className="font-heading text-[22px] text-white tracking-[-0.014em]">
                     Cronología del Comité
                   </h2>
                   <span className="text-[10.5px] uppercase tracking-[0.18em] text-white/35 inline-flex items-center gap-2">
@@ -401,12 +407,12 @@ function DashboardPage() {
                     en vivo
                   </span>
                 </div>
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 [&_.text-charcoal]:!text-white [&_.text-charcoal\/60]:!text-white/60 [&_.text-charcoal\/50]:!text-white/45 [&_.bg-white]:!bg-white/[0.06] [&_.border-charcoal\/15]:!border-white/[0.12] [&_.border-charcoal\/10]:!border-white/[0.08] [&_.bg-charcoal\/10]:!bg-white/[0.06]">
+                <div className="rounded-2xl bg-white/[0.02] p-8 [&_.text-charcoal]:!text-white [&_.text-charcoal\/60]:!text-white/60 [&_.text-charcoal\/50]:!text-white/45 [&_.bg-white]:!bg-white/[0.06] [&_.border-charcoal\/15]:!border-white/[0.12] [&_.border-charcoal\/10]:!border-white/[0.08] [&_.bg-charcoal\/10]:!bg-white/[0.06]">
                   <CommitteeTimeline ctx={ctx} />
                 </div>
               </section>
 
-              <div className="pt-8 mt-8 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="pt-10 mt-6 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-[color:var(--tc-gold)]/10 border border-[color:var(--tc-gold)]/20 flex items-center justify-center">
                     <Sparkles className="w-4 h-4 text-[color:var(--tc-gold)]" />
