@@ -138,6 +138,39 @@ function AuthPage() {
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.2 }}
             >
+              {mode !== "forgot" && (
+                <div
+                  role="tablist"
+                  aria-label="Acceso"
+                  className="mb-8 grid grid-cols-2 gap-1 rounded-xl border border-charcoal/10 bg-charcoal/[0.04] p-1"
+                >
+                  <button
+                    role="tab"
+                    aria-selected={mode === "login"}
+                    onClick={() => setMode("login")}
+                    className={`h-9 rounded-lg text-sm font-medium transition-all ${
+                      mode === "login"
+                        ? "bg-[color:var(--tc-elev)] text-charcoal shadow-sm"
+                        : "text-charcoal/60 hover:text-charcoal"
+                    }`}
+                  >
+                    Iniciar sesión
+                  </button>
+                  <button
+                    role="tab"
+                    aria-selected={mode === "register"}
+                    onClick={() => setMode("register")}
+                    className={`h-9 rounded-lg text-sm font-medium transition-all ${
+                      mode === "register"
+                        ? "bg-[color:var(--tc-elev)] text-charcoal shadow-sm"
+                        : "text-charcoal/60 hover:text-charcoal"
+                    }`}
+                  >
+                    Crear cuenta
+                  </button>
+                </div>
+              )}
+
               <h2 className="font-heading text-3xl text-charcoal tracking-tight">
                 {mode === "login" && "Bienvenido de vuelta"}
                 {mode === "register" && "Crea tu cuenta"}
