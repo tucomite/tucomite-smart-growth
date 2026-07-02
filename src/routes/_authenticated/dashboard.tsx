@@ -18,6 +18,11 @@ import {
   Clock,
   ShoppingBasket,
   Lightbulb,
+  Package,
+  BarChart3,
+  Megaphone,
+  FileText,
+  ClipboardList,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,104 +31,111 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
-type Recommendation = {
+type RecommendationRow = {
   id: string;
-  category: string;
-  icon: typeof PiggyBank;
-  tone: "gold" | "warn" | "neutral";
-  headline: string;
-  problem: string;
-  cause: string;
-  solution: string;
-  impact: string;
-  impactLabel: string;
+  title: string;
+  problem: string | null;
+  cause: string | null;
+  solution: string | null;
+  economic_impact: number | null;
+  time_impact: string | null;
+  priority: string;
+  status: string;
 };
 
-const RECOMMENDATIONS: Recommendation[] = [
-  {
-    id: "r1",
-    category: "Ahorro potencial",
-    icon: PiggyBank,
-    tone: "gold",
-    headline: "Puedes ahorrar 1.240 € este mes cambiando dos proveedores",
-    problem: "Estás pagando un 14% más que el precio medio de mercado en carnes y lácteos.",
-    cause: "Tu proveedor actual no ha ajustado tarifas desde marzo, mientras la competencia bajó precios.",
-    solution: "Sustituir el proveedor de carnes por Cárnicas del Valle y renegociar lácteos con Central Láctea.",
-    impact: "+1.240 € / mes",
-    impactLabel: "impacto estimado",
-  },
-  {
-    id: "r2",
-    category: "Platos con bajo margen",
-    icon: AlertTriangle,
-    tone: "warn",
-    headline: "3 platos de tu carta operan bajo el 25% de margen",
-    problem: "Risotto de setas, Tartar de atún y Ensalada César están por debajo del margen objetivo.",
-    cause: "Subidas de proveedor no repercutidas en el PVP durante los últimos 4 meses.",
-    solution: "Subir 1,40 € el Risotto y 2,10 € el Tartar. Rediseñar la Ensalada César con ingredientes de temporada.",
-    impact: "+ 380 € / mes",
-    impactLabel: "margen recuperado",
-  },
-  {
-    id: "r3",
-    category: "Ingredientes próximos a caducar",
-    icon: Clock,
-    tone: "warn",
-    headline: "6,4 kg de producto caducan en menos de 72h",
-    problem: "Salmón, queso de cabra y espinacas frescas cerca de fecha límite.",
-    cause: "Pedido semanal calculado sobre la demanda del mes anterior, superior a la actual.",
-    solution: "Lanzar sugerencia del chef: tosta de salmón, queso y espinacas al horno. Precio 12,50 €.",
-    impact: "Evita 84 € de merma",
-    impactLabel: "impacto en desperdicio",
-  },
-  {
-    id: "r4",
-    category: "Recomendaciones de compra",
-    icon: ShoppingBasket,
-    tone: "neutral",
-    headline: "Adelanta la compra de aceite de oliva antes del viernes",
-    problem: "El precio de compra subirá previsiblemente un 6% la próxima semana.",
-    cause: "Cierre de campaña en origen y baja disponibilidad regional confirmada por dos proveedores.",
-    solution: "Realizar pedido de 40 L adicionales ahora para cubrir 3 semanas de consumo.",
-    impact: "Ahorro de 92 €",
-    impactLabel: "precio anticipado",
-  },
-  {
-    id: "r5",
-    category: "Nuevas oportunidades",
-    icon: Lightbulb,
-    tone: "gold",
-    headline: "Un menú de mediodía podría añadir 2.100 € al mes",
-    problem: "Ocupación media de sala entre 13:00 y 14:30 por debajo del 45%.",
-    cause: "Ausencia de propuesta cerrada para clientes de oficina en la zona.",
-    solution: "Menú ejecutivo de 3 tiempos a 16,90 € basado en platos con margen superior al 68%.",
-    impact: "+ 2.100 € / mes",
-    impactLabel: "ingresos potenciales",
-  },
-];
+type ActivityRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  type: string | null;
+  created_at: string;
+};
+
+const PRIORITY_META: Record<string, { icon: typeof PiggyBank; tone: "gold" | "warn" | "neutral"; label: string }> = {
+  high: { icon: AlertTriangle, tone: "warn", label: "Prioridad alta" },
+  medium: { icon: PiggyBank, tone: "gold", label: "Oportunidad" },
+  low: { icon: Lightbulb, tone: "neutral", label: "Sugerencia" },
+};
+
+const ACTIVITY_ICON: Record<string, typeof PiggyBank> = {
+  chef: ChefHat,
+  finance: BarChart3,
+  purchasing: ShoppingBasket,
+  stock: Package,
+  marketing: Megaphone,
+  report: FileText,
+};
+
+const currency = new Intl.NumberFormat("es-ES", {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+});
 
 function DashboardPage() {
   const navigate = useNavigate();
   const [restaurantName, setRestaurantName] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
+  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [recommendations, setRecommendations] = useState<RecommendationRow[]>([]);
+  const [activity, setActivity] = useState<ActivityRow[]>([]);
+  const [dishCount, setDishCount] = useState<number>(0);
+  const [expiringSoon, setExpiringSoon] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
   const [applied, setApplied] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     (async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
-      const [{ data: profile }, { data: restaurant }] = await Promise.all([
-        supabase.from("profiles").select("full_name").eq("id", userData.user.id).maybeSingle(),
-        supabase
-          .from("restaurants")
-          .select("name")
-          .eq("owner_id", userData.user.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ]);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, restaurant_id")
+        .eq("id", userData.user.id)
+        .maybeSingle();
       setUserName(profile?.full_name || userData.user.email || "");
+      const rid = profile?.restaurant_id ?? null;
+      setRestaurantId(rid);
+      if (!rid) {
+        setLoading(false);
+        return;
+      }
+      const soonISO = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString().slice(0, 10);
+      const [
+        { data: restaurant },
+        { data: recs },
+        { data: acts },
+        { count: dc },
+        { count: expCount },
+      ] = await Promise.all([
+        supabase.from("restaurants").select("name").eq("id", rid).maybeSingle(),
+        supabase
+          .from("recommendations")
+          .select("id,title,problem,cause,solution,economic_impact,time_impact,priority,status")
+          .eq("restaurant_id", rid)
+          .order("economic_impact", { ascending: false, nullsFirst: false }),
+        supabase
+          .from("committee_activity")
+          .select("id,title,description,type,created_at")
+          .eq("restaurant_id", rid)
+          .order("created_at", { ascending: false })
+          .limit(6),
+        supabase.from("dishes").select("id", { count: "exact", head: true }).eq("restaurant_id", rid),
+        supabase
+          .from("ingredients")
+          .select("id", { count: "exact", head: true })
+          .eq("restaurant_id", rid)
+          .lte("expiration_date", soonISO),
+      ]);
       setRestaurantName(restaurant?.name || "");
+      setRecommendations((recs ?? []) as RecommendationRow[]);
+      setActivity((acts ?? []) as ActivityRow[]);
+      setDishCount(dc ?? 0);
+      setExpiringSoon(expCount ?? 0);
+      setApplied(
+        new Set((recs ?? []).filter((r) => r.status === "applied").map((r) => r.id as string)),
+      );
+      setLoading(false);
     })();
   }, []);
 
@@ -146,8 +158,13 @@ function DashboardPage() {
     [],
   );
 
-  const totalSavings = "3.896 €";
-  const analyzedItems = 47;
+  const totalSavings = useMemo(
+    () =>
+      currency.format(
+        recommendations.reduce((sum, r) => sum + (Number(r.economic_impact) || 0), 0),
+      ),
+    [recommendations],
+  );
 
   const nav = [
     { label: "Informe", icon: LayoutDashboard, active: true },
@@ -158,12 +175,20 @@ function DashboardPage() {
     { label: "Ajustes", icon: Settings },
   ];
 
-  function apply(id: string) {
+  async function apply(id: string) {
     setApplied((prev) => {
       const next = new Set(prev);
       next.add(id);
       return next;
     });
+    const { error } = await supabase
+      .from("recommendations")
+      .update({ status: "applied" })
+      .eq("id", id);
+    if (error) {
+      toast.error("No se pudo aplicar la recomendación");
+      return;
+    }
     toast.success("Recomendación aplicada", {
       description: "El Comité lo tendrá en cuenta en el próximo informe.",
     });
@@ -243,7 +268,7 @@ function DashboardPage() {
             </h1>
             <p className="text-charcoal/60 text-lg mt-4 max-w-2xl leading-relaxed">
               El Comité ha terminado el análisis de tu restaurante. Hemos revisado{" "}
-              <span className="text-charcoal font-medium">{analyzedItems} platos</span>, tus
+              <span className="text-charcoal font-medium">{dishCount} platos</span>, tus
               proveedores activos y el inventario de esta semana.
             </p>
           </motion.section>
@@ -264,13 +289,13 @@ function DashboardPage() {
               />
               <SummaryStat
                 label="Recomendaciones nuevas"
-                value={String(RECOMMENDATIONS.length)}
+                value={String(recommendations.length)}
                 sub="para revisar hoy"
               />
               <SummaryStat
-                label="Expertos que han intervenido"
-                value="5"
-                sub="Chef, Finanzas, Compras, Stock, Marketing"
+                label="Ingredientes que caducan pronto"
+                value={String(expiringSoon)}
+                sub="próximos 3 días"
               />
             </div>
           </motion.section>
@@ -282,22 +307,71 @@ function DashboardPage() {
                 Decisiones sugeridas
               </h2>
               <span className="text-xs uppercase tracking-[0.15em] text-charcoal/40">
-                {RECOMMENDATIONS.length} puntos
+                {recommendations.length} puntos
               </span>
             </div>
 
-            <div className="space-y-4">
-              {RECOMMENDATIONS.map((rec, i) => (
-                <RecommendationCard
-                  key={rec.id}
-                  rec={rec}
-                  index={i}
-                  applied={applied.has(rec.id)}
-                  onApply={() => apply(rec.id)}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="space-y-4">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-40 rounded-2xl border border-charcoal/10 bg-white/60 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : recommendations.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-charcoal/15 bg-white/60 p-10 text-center">
+                <p className="text-charcoal/60">
+                  El Comité aún no ha generado recomendaciones para tu restaurante.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recommendations.map((rec, i) => (
+                  <RecommendationCard
+                    key={rec.id}
+                    rec={rec}
+                    index={i}
+                    applied={applied.has(rec.id)}
+                    onApply={() => apply(rec.id)}
+                  />
+                ))}
+              </div>
+            )}
           </section>
+
+          {/* Committee activity */}
+          {activity.length > 0 && (
+            <section className="mt-16">
+              <div className="flex items-baseline justify-between mb-6">
+                <h2 className="font-heading text-2xl text-charcoal tracking-tight">
+                  Actividad del Comité
+                </h2>
+                <span className="text-xs uppercase tracking-[0.15em] text-charcoal/40">
+                  esta madrugada
+                </span>
+              </div>
+              <ol className="rounded-2xl border border-charcoal/10 bg-white divide-y divide-charcoal/10 overflow-hidden">
+                {activity.map((a) => {
+                  const Icon = (a.type && ACTIVITY_ICON[a.type]) || ClipboardList;
+                  return (
+                    <li key={a.id} className="flex items-start gap-4 px-5 sm:px-6 py-4">
+                      <div className="w-9 h-9 rounded-lg bg-charcoal/[0.06] text-charcoal/70 flex items-center justify-center shrink-0">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-charcoal font-medium">{a.title}</p>
+                        {a.description && (
+                          <p className="text-sm text-charcoal/60 mt-0.5">{a.description}</p>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          )}
 
           {/* Signature */}
           <motion.section
