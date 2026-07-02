@@ -191,6 +191,121 @@
     radial-gradient(circle at 80% 90%, rgba(15,16,19,0.04), transparent 45%);
 }
 
+/* =====================================================================
+   FASE 2 — Enterprise cross-app remap.
+   Legacy pages were authored with hardcoded `white/*`, `black/*`,
+   `charcoal/*` and `cream/*` utilities. To make the light/dark toggle
+   visibly transform every screen (Dashboard, Carta, Comité, Inventario,
+   Proveedores, Rentabilidad, Marketing, Ajustes) without rewriting each
+   file, we remap those utilities to the semantic Enterprise tokens
+   inside `.tc-dark` and `.tc-light` scopes.
+   ===================================================================== */
+
+/* Smooth theme transition on every visible surface */
+.tc-dark, .tc-light,
+.tc-dark *, .tc-light * {
+  transition:
+    background-color 220ms var(--tc-ease),
+    border-color 220ms var(--tc-ease),
+    color 180ms var(--tc-ease),
+    box-shadow 220ms var(--tc-ease);
+}
+.tc-dark *:where(input,textarea,select,[contenteditable]),
+.tc-light *:where(input,textarea,select,[contenteditable]) {
+  transition: background-color 220ms var(--tc-ease), border-color 180ms var(--tc-ease), color 180ms var(--tc-ease), box-shadow 180ms var(--tc-ease);
+}
+
+/* ---------- LIGHT scope: neutralise dark-first utilities ---------- */
+.tc-light [class*="text-white"] { color: var(--tc-text) !important; }
+.tc-light [class*="bg-white"]   { background-color: color-mix(in oklab, var(--tc-fg) 4%, transparent) !important; }
+.tc-light [class*="border-white"] { border-color: var(--tc-line) !important; }
+.tc-light [class*="from-white"] { --tw-gradient-from: color-mix(in oklab, var(--tc-fg) 3%, transparent) !important; }
+.tc-light [class*="to-white"]   { --tw-gradient-to: color-mix(in oklab, var(--tc-fg) 1%, transparent) !important; }
+.tc-light [class*="via-white"]  { --tw-gradient-via: color-mix(in oklab, var(--tc-fg) 2%, transparent) !important; }
+.tc-light [class*="bg-black"]   { background-color: color-mix(in oklab, var(--tc-fg) 5%, transparent) !important; }
+.tc-light [class*="text-black"] { color: var(--tc-gold-dark) !important; }
+.tc-light [class*="text-charcoal"],
+.tc-light .text-charcoal        { color: var(--tc-text) !important; }
+.tc-light [class*="bg-charcoal"],
+.tc-light .bg-charcoal          { background-color: var(--tc-panel-strong) !important; }
+.tc-light [class*="border-charcoal"],
+.tc-light .border-charcoal      { border-color: var(--tc-line) !important; }
+.tc-light [class*="bg-cream"],
+.tc-light .bg-cream             { background-color: var(--tc-elev) !important; }
+.tc-light [class*="text-cream"] { color: var(--tc-text) !important; }
+.tc-light [class*="border-cream"] { border-color: var(--tc-line) !important; }
+.tc-light .bg-\[\#0d0d10\]      { background-color: var(--tc-elev) !important; }
+
+/* Gold buttons keep their token-defined contrast in light mode */
+.tc-light .bg-\[color\:var\(--tc-gold\)\] { color: var(--tc-gold-contrast) !important; }
+.tc-light .bg-\[color\:var\(--tc-gold\)\] * { color: inherit !important; }
+
+/* ---------- DARK scope: neutralise light-first (charcoal/cream) ---------- */
+.tc-dark [class*="text-charcoal"],
+.tc-dark .text-charcoal        { color: var(--tc-text) !important; }
+.tc-dark [class*="bg-charcoal"],
+.tc-dark .bg-charcoal          { background-color: var(--tc-panel-strong) !important; }
+.tc-dark [class*="border-charcoal"],
+.tc-dark .border-charcoal      { border-color: var(--tc-line) !important; }
+.tc-dark [class*="bg-cream"],
+.tc-dark .bg-cream             { background-color: var(--tc-panel) !important; }
+.tc-dark [class*="text-cream"] { color: var(--tc-text) !important; }
+.tc-dark [class*="border-cream"] { border-color: var(--tc-line) !important; }
+
+/* ---------- Elevated card / input primitives (both themes) ---------- */
+.tc-dark, .tc-light {
+  --tc-card-bg: var(--tc-elev);
+  --tc-card-border: var(--tc-line);
+}
+.tc-light {
+  /* Boost card contrast in light mode with soft top-lit gradient */
+  --tc-card-bg: linear-gradient(180deg, #FFFFFF 0%, #FBFAF6 100%);
+}
+
+/* Utility classes that pages may adopt for extra polish */
+@utility tc-card {
+  background: var(--tc-card-bg);
+  border: 1px solid var(--tc-card-border);
+  border-radius: var(--tc-radius-lg);
+  box-shadow: var(--tc-shadow-sm);
+}
+@utility tc-card-elevated {
+  background: var(--tc-card-bg);
+  border: 1px solid var(--tc-line-strong);
+  border-radius: var(--tc-radius-xl);
+  box-shadow: var(--tc-shadow-md);
+}
+
+/* Native form controls follow the theme */
+.tc-dark input:not([type=checkbox]):not([type=radio]),
+.tc-dark textarea,
+.tc-dark select,
+.tc-light input:not([type=checkbox]):not([type=radio]),
+.tc-light textarea,
+.tc-light select {
+  background-color: var(--tc-input-bg);
+  color: var(--tc-text);
+  border-color: var(--tc-line);
+}
+.tc-dark input:focus, .tc-dark textarea:focus, .tc-dark select:focus,
+.tc-light input:focus, .tc-light textarea:focus, .tc-light select:focus {
+  background-color: var(--tc-input-bg-focus);
+  border-color: var(--tc-gold);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--tc-gold) 22%, transparent);
+  outline: none;
+}
+.tc-dark ::placeholder, .tc-light ::placeholder { color: var(--tc-text-mute); }
+
+/* Scrollbar theming */
+.tc-dark  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 8px; }
+.tc-light ::-webkit-scrollbar-thumb { background: rgba(15,16,19,0.14);    border-radius: 8px; }
+.tc-dark  ::-webkit-scrollbar-track,
+.tc-light ::-webkit-scrollbar-track { background: transparent; }
+
+/* Selection */
+.tc-dark  ::selection { background: rgba(212,175,110,0.30); color: #fff; }
+.tc-light ::selection { background: rgba(138,106,44,0.20);  color: #0F1013; }
+
 @layer base {
   * {
     border-color: var(--color-border);
