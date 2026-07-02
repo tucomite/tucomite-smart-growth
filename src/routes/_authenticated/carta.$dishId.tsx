@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -505,7 +505,7 @@ function StatCell({
   sub?: string;
   emphasis?: boolean;
   muted?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div className="px-6 py-6 sm:py-7">
@@ -537,7 +537,7 @@ function Block({
   icon: typeof ChefHat;
   eyebrow: string;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <section>

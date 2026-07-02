@@ -20,6 +20,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedComprasRouteImport } from './routes/_authenticated/compras'
 import { Route as AuthenticatedComiteRouteImport } from './routes/_authenticated/comite'
 import { Route as AuthenticatedCartaRouteImport } from './routes/_authenticated/carta'
+import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedCartaDishIdRouteImport } from './routes/_authenticated/carta.$dishId'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -77,6 +78,11 @@ const AuthenticatedCartaRoute = AuthenticatedCartaRouteImport.update({
   path: '/carta',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCartaDishIdRoute =
   AuthenticatedCartaDishIdRouteImport.update({
     id: '/$dishId',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
   '/carta': typeof AuthenticatedCartaRouteWithChildren
   '/comite': typeof AuthenticatedComiteRoute
   '/compras': typeof AuthenticatedComprasRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
   '/carta': typeof AuthenticatedCartaRouteWithChildren
   '/comite': typeof AuthenticatedComiteRoute
   '/compras': typeof AuthenticatedComprasRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/carta': typeof AuthenticatedCartaRouteWithChildren
   '/_authenticated/comite': typeof AuthenticatedComiteRoute
   '/_authenticated/compras': typeof AuthenticatedComprasRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/ajustes'
     | '/carta'
     | '/comite'
     | '/compras'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/ajustes'
     | '/carta'
     | '/comite'
     | '/compras'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/ajustes'
     | '/_authenticated/carta'
     | '/_authenticated/comite'
     | '/_authenticated/compras'
@@ -254,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCartaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ajustes': {
+      id: '/_authenticated/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof AuthenticatedAjustesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/carta/$dishId': {
       id: '/_authenticated/carta/$dishId'
       path: '/$dishId'
@@ -276,6 +295,7 @@ const AuthenticatedCartaRouteWithChildren =
   AuthenticatedCartaRoute._addFileChildren(AuthenticatedCartaRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedCartaRoute: typeof AuthenticatedCartaRouteWithChildren
   AuthenticatedComiteRoute: typeof AuthenticatedComiteRoute
   AuthenticatedComprasRoute: typeof AuthenticatedComprasRoute
@@ -286,6 +306,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedCartaRoute: AuthenticatedCartaRouteWithChildren,
   AuthenticatedComiteRoute: AuthenticatedComiteRoute,
   AuthenticatedComprasRoute: AuthenticatedComprasRoute,
