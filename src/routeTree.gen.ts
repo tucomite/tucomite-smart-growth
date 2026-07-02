@@ -13,8 +13,15 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRentabilidadRouteImport } from './routes/_authenticated/rentabilidad'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedComprasRouteImport } from './routes/_authenticated/compras'
+import { Route as AuthenticatedComiteRouteImport } from './routes/_authenticated/comite'
+import { Route as AuthenticatedCartaRouteImport } from './routes/_authenticated/carta'
+import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
+import { Route as AuthenticatedCartaDishIdRouteImport } from './routes/_authenticated/carta.$dishId'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -35,9 +42,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRentabilidadRoute =
+  AuthenticatedRentabilidadRouteImport.update({
+    id: '/rentabilidad',
+    path: '/rentabilidad',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInventarioRoute = AuthenticatedInventarioRouteImport.update({
+  id: '/inventario',
+  path: '/inventario',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -45,20 +63,60 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedComprasRoute = AuthenticatedComprasRouteImport.update({
+  id: '/compras',
+  path: '/compras',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedComiteRoute = AuthenticatedComiteRouteImport.update({
+  id: '/comite',
+  path: '/comite',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCartaRoute = AuthenticatedCartaRouteImport.update({
+  id: '/carta',
+  path: '/carta',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCartaDishIdRoute =
+  AuthenticatedCartaDishIdRouteImport.update({
+    id: '/$dishId',
+    path: '/$dishId',
+    getParentRoute: () => AuthenticatedCartaRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/carta': typeof AuthenticatedCartaRouteWithChildren
+  '/comite': typeof AuthenticatedComiteRoute
+  '/compras': typeof AuthenticatedComprasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/rentabilidad': typeof AuthenticatedRentabilidadRoute
+  '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/carta': typeof AuthenticatedCartaRouteWithChildren
+  '/comite': typeof AuthenticatedComiteRoute
+  '/compras': typeof AuthenticatedComprasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/rentabilidad': typeof AuthenticatedRentabilidadRoute
+  '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -66,22 +124,60 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
+  '/_authenticated/carta': typeof AuthenticatedCartaRouteWithChildren
+  '/_authenticated/comite': typeof AuthenticatedComiteRoute
+  '/_authenticated/compras': typeof AuthenticatedComprasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/rentabilidad': typeof AuthenticatedRentabilidadRoute
+  '/_authenticated/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/reset-password' | '/dashboard' | '/onboarding'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/ajustes'
+    | '/carta'
+    | '/comite'
+    | '/compras'
+    | '/dashboard'
+    | '/inventario'
+    | '/onboarding'
+    | '/rentabilidad'
+    | '/carta/$dishId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/reset-password' | '/dashboard' | '/onboarding'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/ajustes'
+    | '/carta'
+    | '/comite'
+    | '/compras'
+    | '/dashboard'
+    | '/inventario'
+    | '/onboarding'
+    | '/rentabilidad'
+    | '/carta/$dishId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/ajustes'
+    | '/_authenticated/carta'
+    | '/_authenticated/comite'
+    | '/_authenticated/compras'
     | '/_authenticated/dashboard'
+    | '/_authenticated/inventario'
     | '/_authenticated/onboarding'
+    | '/_authenticated/rentabilidad'
+    | '/_authenticated/carta/$dishId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -121,11 +217,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/rentabilidad': {
+      id: '/_authenticated/rentabilidad'
+      path: '/rentabilidad'
+      fullPath: '/rentabilidad'
+      preLoaderRoute: typeof AuthenticatedRentabilidadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inventario': {
+      id: '/_authenticated/inventario'
+      path: '/inventario'
+      fullPath: '/inventario'
+      preLoaderRoute: typeof AuthenticatedInventarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -135,17 +245,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/compras': {
+      id: '/_authenticated/compras'
+      path: '/compras'
+      fullPath: '/compras'
+      preLoaderRoute: typeof AuthenticatedComprasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/comite': {
+      id: '/_authenticated/comite'
+      path: '/comite'
+      fullPath: '/comite'
+      preLoaderRoute: typeof AuthenticatedComiteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/carta': {
+      id: '/_authenticated/carta'
+      path: '/carta'
+      fullPath: '/carta'
+      preLoaderRoute: typeof AuthenticatedCartaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ajustes': {
+      id: '/_authenticated/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof AuthenticatedAjustesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/carta/$dishId': {
+      id: '/_authenticated/carta/$dishId'
+      path: '/$dishId'
+      fullPath: '/carta/$dishId'
+      preLoaderRoute: typeof AuthenticatedCartaDishIdRouteImport
+      parentRoute: typeof AuthenticatedCartaRoute
+    }
   }
 }
 
+interface AuthenticatedCartaRouteChildren {
+  AuthenticatedCartaDishIdRoute: typeof AuthenticatedCartaDishIdRoute
+}
+
+const AuthenticatedCartaRouteChildren: AuthenticatedCartaRouteChildren = {
+  AuthenticatedCartaDishIdRoute: AuthenticatedCartaDishIdRoute,
+}
+
+const AuthenticatedCartaRouteWithChildren =
+  AuthenticatedCartaRoute._addFileChildren(AuthenticatedCartaRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
+  AuthenticatedCartaRoute: typeof AuthenticatedCartaRouteWithChildren
+  AuthenticatedComiteRoute: typeof AuthenticatedComiteRoute
+  AuthenticatedComprasRoute: typeof AuthenticatedComprasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedRentabilidadRoute: typeof AuthenticatedRentabilidadRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
+  AuthenticatedCartaRoute: AuthenticatedCartaRouteWithChildren,
+  AuthenticatedComiteRoute: AuthenticatedComiteRoute,
+  AuthenticatedComprasRoute: AuthenticatedComprasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedRentabilidadRoute: AuthenticatedRentabilidadRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
