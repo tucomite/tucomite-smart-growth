@@ -36,8 +36,26 @@ import { AnimatedNumber } from "@/components/ui/animated-number";
 import { DirectorModeToggle, type Mode } from "@/components/app/DirectorModeToggle";
 import { DirectorSummary } from "@/components/app/DirectorSummary";
 import { CommitteeTimeline } from "@/components/app/CommitteeTimeline";
+import { CommitteeTimelineImpl } from "@/components/app/CommitteeTimeline";
 import { RecommendationRationale } from "@/components/app/RecommendationRationale";
 import { HealthRing } from "@/components/app/HealthRing";
+import {
+  TopActionsToday,
+  OpportunitiesPanel,
+  RisksPanel,
+  GoalsPanel,
+  SimulationPanel,
+  MissingDataPanel,
+  ExecutiveToolbar,
+  TimelineRangeTabs,
+  RecEnrichmentBadges,
+  RecFourActions,
+  updateRecStatus,
+  usePresentationMode,
+  type TimelineRange,
+  type RecAction,
+} from "@/components/app/Phase4Sections";
+import { enrichRecommendations } from "@/lib/recommendationIntel";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Centro de mando — TuComité" }] }),
@@ -80,6 +98,13 @@ function DashboardPage() {
   const ctx = useRestaurantIntelligence();
   const { loading, restaurantName, userName, recommendations, dishes, ingredients, suppliers } = ctx;
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [timelineRange, setTimelineRange] = useState<TimelineRange>("semana");
+  const presentation = usePresentationMode();
+  const enrichedById = useMemo(() => {
+    const map = new Map<string, ReturnType<typeof enrichRecommendations>[number]>();
+    enrichRecommendations(recommendations, ctx).forEach((e) => map.set(e.rec.id, e));
+    return map;
+  }, [recommendations, ctx]);
   const [mode, setMode] = useState<Mode>(() => {
     if (typeof window === "undefined") return "operativo";
     return (window.localStorage.getItem("tucomite:mode") as Mode) || "operativo";
@@ -118,15 +143,8 @@ function DashboardPage() {
 
   const pendingRecs = recommendations.filter((r) => r.status !== "applied");
 
-  async function apply(id: string) {
-    const { error } = await supabase.from("recommendations").update({ status: "applied" }).eq("id", id);
-    if (error) {
-      toast.error("No se pudo aplicar la recomendación");
-      return;
-    }
-    toast.success("Recomendación aplicada", {
-      description: "El Comité lo tendrá en cuenta en el próximo informe.",
-    });
+  async function handleRecAction(id: string, action: RecAction) {
+    await updateRecStatus(id, action);
   }
 
   return (
@@ -187,6 +205,14 @@ function DashboardPage() {
               transition={{ duration: 0.4 }}
               className="space-y-16"
             >
+              {/* Executive toolbar (PDF + Presentation) */}
+              <div className="flex justify-end">
+                <ExecutiveToolbar ctx={ctx} onPresent={presentation.show} />
+              </div>
+
+              {/* TOP 3 Actions today */}
+              <TopActionsToday ctx={ctx} onAction={handleRecAction} />
+
               {/* Live pulses */}
               {pulses.length > 0 && (
                 <motion.div
@@ -383,7 +409,8 @@ function DashboardPage() {
                         rec={rec}
                         index={i}
                         applied={appliedIds.has(rec.id)}
-                        onApply={() => apply(rec.id)}
+                        onAction={(a) => handleRecAction(rec.id, a)}
+                        enriched={enrichedById.get(rec.id)}
                         expanded={expanded === rec.id}
                         onToggleExpand={() =>
                           setExpanded((cur) => (cur === rec.id ? null : rec.id))
@@ -396,19 +423,31 @@ function DashboardPage() {
                 )}
               </section>
 
+              {/* Opportunities / Risks / Goals / Simulation / Missing */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <OpportunitiesPanel ctx={ctx} />
+                <RisksPanel ctx={ctx} />
+              </div>
+              <SimulationPanel ctx={ctx} />
+              <GoalsPanel ctx={ctx} />
+              <MissingDataPanel ctx={ctx} />
+
               {/* Timeline */}
               <section>
                 <div className="flex items-baseline justify-between mb-6">
                   <h2 className="font-heading text-[22px] text-white tracking-[-0.014em]">
                     Cronología del Comité
                   </h2>
-                  <span className="text-[10.5px] uppercase tracking-[0.18em] text-white/35 inline-flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    en vivo
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <TimelineRangeTabs value={timelineRange} onChange={setTimelineRange} />
+                    <span className="text-[10.5px] uppercase tracking-[0.18em] text-white/35 inline-flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      en vivo
+                    </span>
+                  </div>
                 </div>
                 <div className="rounded-2xl bg-white/[0.02] p-8 [&_.text-charcoal]:!text-white [&_.text-charcoal\/60]:!text-white/60 [&_.text-charcoal\/50]:!text-white/45 [&_.bg-white]:!bg-white/[0.06] [&_.border-charcoal\/15]:!border-white/[0.12] [&_.border-charcoal\/10]:!border-white/[0.08] [&_.bg-charcoal\/10]:!bg-white/[0.06]">
-                  <CommitteeTimeline ctx={ctx} />
+                  <CommitteeTimelineImpl ctx={ctx} range={timelineRange} />
                 </div>
               </section>
 
@@ -430,6 +469,7 @@ function DashboardPage() {
             </motion.div>
           )}
         </AnimatePresence>
+        {presentation.render(ctx)}
       </div>
     </AppShell>
   );
@@ -492,7 +532,8 @@ function RecommendationCard({
   rec,
   index,
   applied,
-  onApply,
+  onAction,
+  enriched,
   expanded,
   onToggleExpand,
   restaurantName,
@@ -501,7 +542,8 @@ function RecommendationCard({
   rec: RecommendationRow;
   index: number;
   applied: boolean;
-  onApply: () => void;
+  onAction: (a: RecAction) => void;
+  enriched?: ReturnType<typeof enrichRecommendations>[number];
   expanded: boolean;
   onToggleExpand: () => void;
   restaurantName: string;
@@ -542,6 +584,11 @@ function RecommendationCard({
             <h3 className="font-heading text-[22px] sm:text-[24px] text-white tracking-[-0.014em] mt-2.5 leading-[1.2]">
               {rec.title}
             </h3>
+            {enriched && (
+              <div className="mt-3">
+                <RecEnrichmentBadges e={enriched} />
+              </div>
+            )}
           </div>
           {impactEur > 0 && (
             <div className="hidden sm:flex flex-col items-end shrink-0 pl-4">
@@ -566,19 +613,7 @@ function RecommendationCard({
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
           <div className="ml-auto flex items-center gap-2">
-            {applied ? (
-              <span className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[10px] bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[12.5px] font-medium">
-                <Check className="w-3.5 h-3.5" strokeWidth={2} /> Aplicada
-              </span>
-            ) : (
-              <button
-                onClick={onApply}
-                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-[10px] bg-gradient-to-b from-[color:var(--tc-gold-light)] via-[color:var(--tc-gold)] to-[color:var(--tc-gold-dark)] text-[color:var(--tc-gold-contrast)] text-[12.5px] font-semibold hover:brightness-110 active:translate-y-[0.5px] transition-all shadow-[0_0_20px_-6px_rgba(201,169,114,0.45)]"
-              >
-                Aplicar
-                <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={2} />
-              </button>
-            )}
+            <RecFourActions applied={applied} onAction={onAction} />
           </div>
         </div>
 
