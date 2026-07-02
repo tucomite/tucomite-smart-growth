@@ -444,6 +444,7 @@ function RecommendationCard({
   expanded,
   onToggleExpand,
   restaurantName,
+  ctx,
 }: {
   rec: RecommendationRow;
   index: number;
@@ -452,6 +453,7 @@ function RecommendationCard({
   expanded: boolean;
   onToggleExpand: () => void;
   restaurantName: string;
+  ctx: import("@/hooks/useRestaurantIntelligence").Intelligence;
 }) {
   const meta = PRIORITY_META[rec.priority] ?? PRIORITY_META.medium;
   const Icon = meta.icon;
