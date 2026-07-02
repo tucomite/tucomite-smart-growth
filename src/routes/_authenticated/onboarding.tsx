@@ -74,14 +74,15 @@ function OnboardingPage() {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("No hay sesión");
-      const { error: restErr } = await supabase.from("restaurants").insert({
-        owner_id: userData.user.id,
-        ...form,
-      });
+      const { data: restaurant, error: restErr } = await supabase
+        .from("restaurants")
+        .insert({ owner_id: userData.user.id, ...form })
+        .select("id")
+        .single();
       if (restErr) throw restErr;
       const { error: profErr } = await supabase
         .from("profiles")
-        .update({ onboarding_completed: true })
+        .update({ onboarding_completed: true, restaurant_id: restaurant.id })
         .eq("id", userData.user.id);
       if (profErr) throw profErr;
       toast.success("Tu comité está listo");
