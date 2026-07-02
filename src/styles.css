@@ -257,6 +257,40 @@
 .tc-dark [class*="text-cream"] { color: var(--tc-text) !important; }
 .tc-dark [class*="border-cream"] { border-color: var(--tc-line) !important; }
 
+/* Bare `bg-white` / `text-white` / `border-white` / `bg-black` — no opacity
+   modifier — must NEVER render as solid white/black inside a dark scope,
+   otherwise cards/buttons look inverted. Word-boundary selectors leave the
+   subtle `bg-white/[0.03]` glass utilities untouched. */
+.tc-dark [class~="bg-white"]     { background-color: var(--tc-elev) !important; }
+.tc-dark [class~="text-white"]   { color: var(--tc-text) !important; }
+.tc-dark [class~="border-white"] { border-color: var(--tc-line-strong) !important; }
+.tc-dark [class~="bg-black"]     { background-color: var(--tc-ink) !important; }
+.tc-dark [class~="text-black"]   { color: var(--tc-text) !important; }
+.tc-dark [class~="border-black"] { border-color: var(--tc-line-strong) !important; }
+
+/* Shadcn portal primitives that hardcode `bg-background` / `bg-popover`
+   render outside the AppShell subtree. The theme scope is now on <body>,
+   so we route these tokens through our design tokens for both themes. */
+.tc-dark, .tc-light {
+  --background: var(--tc-ink);
+  --foreground: var(--tc-text);
+  --card: var(--tc-elev);
+  --card-foreground: var(--tc-text);
+  --popover: var(--tc-elev);
+  --popover-foreground: var(--tc-text);
+  --primary: var(--tc-gold);
+  --primary-foreground: var(--tc-gold-contrast);
+  --secondary: var(--tc-panel-strong);
+  --secondary-foreground: var(--tc-text);
+  --muted: var(--tc-panel);
+  --muted-foreground: var(--tc-text-dim);
+  --accent: var(--tc-panel-strong);
+  --accent-foreground: var(--tc-text);
+  --border: var(--tc-line);
+  --input: var(--tc-line);
+  --ring: var(--tc-gold);
+}
+
 /* ---------- Elevated card / input primitives (both themes) ---------- */
 .tc-dark, .tc-light {
   --tc-card-bg: var(--tc-elev);
