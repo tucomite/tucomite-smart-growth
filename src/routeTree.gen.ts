@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRentabilidadRouteImport } from './routes/_authenticated/rentabilidad'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedMarketingRouteImport } from './routes/_authenticated/marketing'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedComprasRouteImport } from './routes/_authenticated/compras'
@@ -51,6 +52,11 @@ const AuthenticatedRentabilidadRoute =
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMarketingRoute = AuthenticatedMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedInventarioRoute = AuthenticatedInventarioRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/compras': typeof AuthenticatedComprasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventario': typeof AuthenticatedInventarioRoute
+  '/marketing': typeof AuthenticatedMarketingRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/compras': typeof AuthenticatedComprasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventario': typeof AuthenticatedInventarioRoute
+  '/marketing': typeof AuthenticatedMarketingRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/_authenticated/compras': typeof AuthenticatedComprasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
+  '/_authenticated/marketing': typeof AuthenticatedMarketingRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/_authenticated/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/compras'
     | '/dashboard'
     | '/inventario'
+    | '/marketing'
     | '/onboarding'
     | '/rentabilidad'
     | '/carta/$dishId'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/compras'
     | '/dashboard'
     | '/inventario'
+    | '/marketing'
     | '/onboarding'
     | '/rentabilidad'
     | '/carta/$dishId'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/compras'
     | '/_authenticated/dashboard'
     | '/_authenticated/inventario'
+    | '/_authenticated/marketing'
     | '/_authenticated/onboarding'
     | '/_authenticated/rentabilidad'
     | '/_authenticated/carta/$dishId'
@@ -229,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/marketing': {
+      id: '/_authenticated/marketing'
+      path: '/marketing'
+      fullPath: '/marketing'
+      preLoaderRoute: typeof AuthenticatedMarketingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/inventario': {
@@ -289,6 +308,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedComprasRoute: typeof AuthenticatedComprasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
+  AuthenticatedMarketingRoute: typeof AuthenticatedMarketingRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRentabilidadRoute: typeof AuthenticatedRentabilidadRoute
   AuthenticatedCartaDishIdRoute: typeof AuthenticatedCartaDishIdRoute
@@ -301,6 +321,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComprasRoute: AuthenticatedComprasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
+  AuthenticatedMarketingRoute: AuthenticatedMarketingRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRentabilidadRoute: AuthenticatedRentabilidadRoute,
   AuthenticatedCartaDishIdRoute: AuthenticatedCartaDishIdRoute,
