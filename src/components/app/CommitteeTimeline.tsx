@@ -9,6 +9,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import type { CommitteeActivity, Intelligence } from "@/hooks/useRestaurantIntelligence";
+import type { TimelineRange } from "./Phase4Sections";
 
 const ICONS: Record<string, typeof ChefHat> = {
   chef: ChefHat,
@@ -25,42 +26,94 @@ const timeFmt = new Intl.DateTimeFormat("es-ES", {
 });
 
 export function CommitteeTimeline({ ctx }: { ctx: Intelligence }) {
-  const items = buildTimeline(ctx);
+  return <CommitteeTimelineImpl ctx={ctx} range="semana" />;
+}
+
+export function CommitteeTimelineImpl({
+  ctx,
+  range,
+}: {
+  ctx: Intelligence;
+  range: TimelineRange;
+}) {
+  const items = filterByRange(buildTimeline(ctx), range);
   if (items.length === 0) return null;
+  const grouped = groupByDay(items);
   return (
     <div className="relative pl-6">
       <span className="absolute left-[11px] top-2 bottom-2 w-px bg-charcoal/10" />
-      <ol className="space-y-5">
-        {items.map((a, i) => {
-          const Icon = (a.type && ICONS[a.type]) || ClipboardList;
-          return (
-            <motion.li
-              key={a.id}
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="relative"
-            >
-              <span className="absolute -left-6 top-1 w-6 h-6 rounded-full bg-white border border-charcoal/15 flex items-center justify-center text-charcoal/70">
-                <Icon className="w-3 h-3" />
-              </span>
-              <div className="flex items-baseline gap-3">
-                <span className="text-xs text-charcoal/50 tabular-nums w-11 shrink-0">
-                  {timeFmt.format(new Date(a.created_at))}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm text-charcoal font-medium">{a.title}</p>
-                  {a.description && (
-                    <p className="text-xs text-charcoal/60 mt-0.5">{a.description}</p>
-                  )}
-                </div>
-              </div>
-            </motion.li>
-          );
-        })}
-      </ol>
+      <div className="space-y-8">
+        {grouped.map(([day, entries]) => (
+          <div key={day}>
+            <p className="text-[10.5px] uppercase tracking-[0.22em] text-charcoal/50 font-medium mb-3">
+              {day}
+            </p>
+            <ol className="space-y-5">
+              {entries.map((a, i) => {
+                const Icon = (a.type && ICONS[a.type]) || ClipboardList;
+                return (
+                  <motion.li
+                    key={a.id}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                    className="relative"
+                  >
+                    <span className="absolute -left-6 top-1 w-6 h-6 rounded-full bg-white border border-charcoal/15 flex items-center justify-center text-charcoal/70">
+                      <Icon className="w-3 h-3" />
+                    </span>
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-xs text-charcoal/50 tabular-nums w-11 shrink-0">
+                        {timeFmt.format(new Date(a.created_at))}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm text-charcoal font-medium">{a.title}</p>
+                        {a.description && (
+                          <p className="text-xs text-charcoal/60 mt-0.5">{a.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.li>
+                );
+              })}
+            </ol>
+          </div>
+        ))}
+      </div>
     </div>
   );
+}
+
+function filterByRange(items: CommitteeActivity[], range: TimelineRange): CommitteeActivity[] {
+  const now = Date.now();
+  const day = 86400000;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const startTs = startOfToday.getTime();
+  return items.filter((a) => {
+    const t = new Date(a.created_at).getTime();
+    if (range === "hoy") return t >= startTs;
+    if (range === "ayer") return t >= startTs - day && t < startTs;
+    if (range === "semana") return now - t <= 7 * day;
+    return now - t <= 30 * day;
+  });
+}
+
+const dayFmt = new Intl.DateTimeFormat("es-ES", { weekday: "long", day: "numeric", month: "long" });
+function groupByDay(items: CommitteeActivity[]): [string, CommitteeActivity[]][] {
+  const map = new Map<string, CommitteeActivity[]>();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const yest = new Date(today.getTime() - 86400000);
+  items.forEach((a) => {
+    const d = new Date(a.created_at); d.setHours(0,0,0,0);
+    let label: string;
+    if (d.getTime() === today.getTime()) label = "Hoy";
+    else if (d.getTime() === yest.getTime()) label = "Ayer";
+    else label = dayFmt.format(d);
+    if (!map.has(label)) map.set(label, []);
+    map.get(label)!.push(a);
+  });
+  return Array.from(map.entries());
 }
 
 // Build a rich timeline: real activity + synthetic recent entries derived from data.
