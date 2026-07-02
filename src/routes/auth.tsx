@@ -50,6 +50,10 @@ function AuthPage() {
     });
   }, [navigate, redirect]);
 
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
