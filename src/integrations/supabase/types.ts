@@ -49,44 +49,117 @@ export type Database = {
           },
         ]
       }
+      dish_ingredients: {
+        Row: {
+          created_at: string
+          dish_id: string
+          id: string
+          ingredient_id: string
+          quantity: number
+          restaurant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dish_id: string
+          id?: string
+          ingredient_id: string
+          quantity?: number
+          restaurant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dish_id?: string
+          id?: string
+          ingredient_id?: string
+          quantity?: number
+          restaurant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dish_ingredients_dish_id_fkey"
+            columns: ["dish_id"]
+            isOneToOne: false
+            referencedRelation: "dishes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dish_ingredients_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            isOneToOne: false
+            referencedRelation: "ingredients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dish_ingredients_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dishes: {
         Row: {
           allergens: string[] | null
           category: string | null
+          chef_notes: string | null
           cost: number | null
           created_at: string
+          description: string | null
           id: string
+          labor_cost: number
           margin: number | null
+          monthly_sales: number
           name: string
+          popularity: number
+          recommended_price: number | null
           restaurant_id: string
           sale_price: number | null
           status: string
+          target_margin: number
           updated_at: string
         }
         Insert: {
           allergens?: string[] | null
           category?: string | null
+          chef_notes?: string | null
           cost?: number | null
           created_at?: string
+          description?: string | null
           id?: string
+          labor_cost?: number
           margin?: number | null
+          monthly_sales?: number
           name: string
+          popularity?: number
+          recommended_price?: number | null
           restaurant_id: string
           sale_price?: number | null
           status?: string
+          target_margin?: number
           updated_at?: string
         }
         Update: {
           allergens?: string[] | null
           category?: string | null
+          chef_notes?: string | null
           cost?: number | null
           created_at?: string
+          description?: string | null
           id?: string
+          labor_cost?: number
           margin?: number | null
+          monthly_sales?: number
           name?: string
+          popularity?: number
+          recommended_price?: number | null
           restaurant_id?: string
           sale_price?: number | null
           status?: string
+          target_margin?: number
           updated_at?: string
         }
         Relationships: [
@@ -101,6 +174,8 @@ export type Database = {
       }
       ingredients: {
         Row: {
+          alternative_price: number | null
+          alternative_supplier_id: string | null
           created_at: string
           current_price: number | null
           expiration_date: string | null
@@ -114,6 +189,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          alternative_price?: number | null
+          alternative_supplier_id?: string | null
           created_at?: string
           current_price?: number | null
           expiration_date?: string | null
@@ -127,6 +204,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          alternative_price?: number | null
+          alternative_supplier_id?: string | null
           created_at?: string
           current_price?: number | null
           expiration_date?: string | null
@@ -140,6 +219,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ingredients_alternative_supplier_id_fkey"
+            columns: ["alternative_supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ingredients_restaurant_id_fkey"
             columns: ["restaurant_id"]

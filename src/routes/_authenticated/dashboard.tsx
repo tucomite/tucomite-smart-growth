@@ -1,21 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { AppShell } from "@/components/app/AppShell";
 import {
-  LogOut,
-  LayoutDashboard,
-  BookOpen,
   ChefHat,
-  TrendingUp,
-  Users,
-  Settings,
-  ArrowUpRight,
   Sparkles,
-  Check,
   PiggyBank,
   AlertTriangle,
-  Clock,
   ShoppingBasket,
   Lightbulb,
   Package,
@@ -23,6 +15,8 @@ import {
   Megaphone,
   FileText,
   ClipboardList,
+  Check,
+  ArrowUpRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -73,7 +67,6 @@ const currency = new Intl.NumberFormat("es-ES", {
 });
 
 function DashboardPage() {
-  const navigate = useNavigate();
   const [restaurantName, setRestaurantName] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -139,12 +132,6 @@ function DashboardPage() {
     })();
   }, []);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    toast.success("Sesión cerrada");
-    navigate({ to: "/" });
-  }
-
   const firstName = useMemo(() => (userName ? userName.split(" ")[0] : ""), [userName]);
 
   const today = useMemo(
@@ -166,15 +153,6 @@ function DashboardPage() {
     [recommendations],
   );
 
-  const nav = [
-    { label: "Informe", icon: LayoutDashboard, active: true },
-    { label: "Carta", icon: BookOpen },
-    { label: "Recetas", icon: ChefHat },
-    { label: "Rentabilidad", icon: TrendingUp },
-    { label: "Equipo", icon: Users },
-    { label: "Ajustes", icon: Settings },
-  ];
-
   async function apply(id: string) {
     setApplied((prev) => {
       const next = new Set(prev);
@@ -195,64 +173,14 @@ function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--cream)] flex">
-      {/* Sidebar */}
-      <aside className="hidden md:flex md:w-60 flex-col border-r border-charcoal/10 bg-white/40 p-5">
-        <div className="flex items-center gap-2.5 mb-10 px-2">
-          <div className="w-7 h-7 rounded bg-[color:var(--gold)] flex items-center justify-center">
-            <span className="font-heading text-charcoal text-sm font-semibold">T</span>
-          </div>
-          <span className="font-heading text-charcoal text-sm">TuComité</span>
-        </div>
-        <nav className="space-y-0.5 flex-1">
-          {nav.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                disabled={!item.active}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                  item.active
-                    ? "bg-charcoal/[0.06] text-charcoal font-medium"
-                    : "text-charcoal/50 hover:bg-charcoal/[0.04] disabled:opacity-60 disabled:cursor-not-allowed"
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {item.label}
-                {!item.active && (
-                  <span className="ml-auto text-[10px] uppercase tracking-wider text-charcoal/40">
-                    Pronto
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-charcoal/60 hover:text-charcoal hover:bg-charcoal/[0.04] transition-colors"
-        >
-          <LogOut className="w-4 h-4" /> Cerrar sesión
-        </button>
-      </aside>
-
-      {/* Main */}
-      <main className="flex-1 min-w-0">
-        <header className="border-b border-charcoal/10 px-6 sm:px-10 py-4 flex items-center justify-between bg-[color:var(--cream)]/80 backdrop-blur sticky top-0 z-10">
-          <div className="flex items-center gap-3 text-xs text-charcoal/50">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Informe del {today}
-            </span>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="md:hidden text-sm text-charcoal/60 hover:text-charcoal"
-          >
-            Salir
-          </button>
-        </header>
-
+    <AppShell
+      eyebrow={
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          Informe del {today}
+        </span>
+      }
+    >
         <div className="px-6 sm:px-10 lg:px-16 py-12 sm:py-16 max-w-5xl mx-auto">
           {/* Greeting */}
           <motion.section
@@ -398,8 +326,7 @@ function DashboardPage() {
             </p>
           </motion.section>
         </div>
-      </main>
-    </div>
+    </AppShell>
   );
 }
 
