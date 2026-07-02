@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { Link } from "@tanstack/react-router";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -54,12 +55,14 @@ export function Navbar() {
           </div>
 
           <div className="hidden md:block">
-            <button
-              onClick={() => scrollTo("cta-final")}
+            <Link
+              to="/auth"
+              search={{ mode: "register" }}
+              onClick={() => setMenuOpen(false)}
               className="rounded-full bg-charcoal px-5 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-charcoal/90 hover:shadow-lg"
             >
               Solicitar auditoría
-            </button>
+            </Link>
           </div>
 
           <button
@@ -87,12 +90,14 @@ export function Navbar() {
             <button onClick={() => scrollTo("planes")} className="block w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors py-2">
               Planes
             </button>
-            <button
-              onClick={() => scrollTo("cta-final")}
-              className="w-full rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-primary-foreground"
+            <Link
+              to="/auth"
+              search={{ mode: "register" }}
+              onClick={() => setMenuOpen(false)}
+              className="block text-center w-full rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-primary-foreground"
             >
               Solicitar auditoría
-            </button>
+            </Link>
           </div>
         </div>
       )}

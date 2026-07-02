@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Check, Zap, ClipboardCheck } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const betaFeatures = [
   "Auditoría de carta completa",
@@ -18,11 +19,6 @@ const auditFeatures = [
 ];
 
 export function PricingSection() {
-  const scrollToCTA = () => {
-    const el = document.getElementById("cta-final");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <section id="planes" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -82,12 +78,13 @@ export function PricingSection() {
               ))}
             </ul>
 
-            <button
-              onClick={scrollToCTA}
-              className="mt-8 w-full rounded-full bg-charcoal px-6 py-3.5 text-base font-medium text-primary-foreground transition-all hover:bg-charcoal/90 hover:shadow-lg"
+            <Link
+              to="/auth"
+              search={{ mode: "register" }}
+              className="mt-8 block text-center w-full rounded-full bg-charcoal px-6 py-3.5 text-base font-medium text-primary-foreground transition-all hover:bg-charcoal/90 hover:shadow-lg"
             >
               Quiero ser beta fundador
-            </button>
+            </Link>
           </motion.div>
 
           {/* One-time Audit */}
@@ -125,12 +122,13 @@ export function PricingSection() {
               ))}
             </ul>
 
-            <button
-              onClick={scrollToCTA}
-              className="mt-8 w-full rounded-full border border-border bg-background px-6 py-3.5 text-base font-medium text-foreground transition-all hover:bg-cream hover:border-gold/40"
+            <Link
+              to="/auth"
+              search={{ mode: "register" }}
+              className="mt-8 block text-center w-full rounded-full border border-border bg-background px-6 py-3.5 text-base font-medium text-foreground transition-all hover:bg-cream hover:border-gold/40"
             >
               Solicitar auditoría
-            </button>
+            </Link>
           </motion.div>
         </div>
       </div>

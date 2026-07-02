@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import heroImg from "../../assets/hero-restaurant.jpg";
+import { Link } from "@tanstack/react-router";
 
 export function HeroSection() {
   const scrollTo = (id: string) => {
@@ -60,13 +61,14 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
             className="mt-10 flex flex-col sm:flex-row gap-4"
           >
-            <button
-              onClick={() => scrollTo("cta-final")}
+            <Link
+              to="/auth"
+              search={{ mode: "register" }}
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-charcoal px-8 py-4 text-base font-medium text-primary-foreground transition-all hover:bg-charcoal/90 hover:shadow-xl hover:shadow-charcoal/20"
             >
               Solicitar auditoría gratuita
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
+            </Link>
             <button
               onClick={() => scrollTo("como-funciona")}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-background/80 backdrop-blur-sm px-8 py-4 text-base font-medium text-foreground transition-all hover:bg-background hover:border-gold/40"

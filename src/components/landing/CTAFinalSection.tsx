@@ -1,19 +1,8 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Mail } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export function CTAFinalSection() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setSubmitted(true);
-      setEmail("");
-    }
-  };
-
   return (
     <section id="cta-final" className="relative py-24 sm:py-32 bg-charcoal overflow-hidden">
       {/* Subtle pattern overlay */}
@@ -37,7 +26,7 @@ export function CTAFinalSection() {
             cada mes
           </h2>
           <p className="mt-6 text-lg text-cream/70 max-w-2xl mx-auto">
-            Déjanos tu email y te contactamos en menos de 24 horas para empezar tu auditoría gratuita.
+            Crea tu cuenta ahora y empieza tu auditoría gratuita en menos de 3 minutos.
           </p>
         </motion.div>
 
@@ -46,39 +35,18 @@ export function CTAFinalSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-10"
+          className="mt-10 flex flex-col items-center gap-4"
         >
-          {!submitted ? (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-              <div className="relative flex-1">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-cream/40" />
-                <input
-                  type="email"
-                  required
-                  placeholder="tu@restaurante.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-full bg-cream/10 border border-cream/20 pl-12 pr-4 py-4 text-cream placeholder:text-cream/40 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all"
-                />
-              </div>
-              <button
-                type="submit"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-gold px-8 py-4 text-base font-semibold text-charcoal transition-all hover:bg-gold-light hover:shadow-lg hover:shadow-gold/20"
-              >
-                Solicitar auditoría gratuita
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
-            </form>
-          ) : (
-            <div className="rounded-2xl border border-gold/30 bg-gold/10 px-8 py-6 max-w-lg mx-auto">
-              <p className="text-cream font-medium">
-                ¡Gracias! Te escribiremos pronto a tu email.
-              </p>
-            </div>
-          )}
-
-          <p className="mt-4 text-sm text-cream/40">
-            Sin spam. Puedes darte de baja en cualquier momento.
+          <Link
+            to="/auth"
+            search={{ mode: "register" }}
+            className="group inline-flex items-center justify-center gap-2 rounded-full bg-gold px-10 py-4 text-base font-semibold text-charcoal transition-all hover:bg-gold-light hover:shadow-lg hover:shadow-gold/20"
+          >
+            Empezar auditoría gratuita
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+          <p className="text-sm text-cream/40">
+            Sin tarjeta. Configura tu restaurante en menos de 3 minutos.
           </p>
         </motion.div>
       </div>
