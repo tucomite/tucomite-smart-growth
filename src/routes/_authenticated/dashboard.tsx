@@ -27,7 +27,13 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useRestaurantIntelligence, type Intelligence, type Recommendation as RecT } from "@/hooks/useRestaurantIntelligence";
+import {
+  useRestaurantIntelligence,
+  type Recommendation as RecT,
+  type Dish as DishRow,
+  type Ingredient as IngredientRow,
+  type Supplier as SupplierRow,
+} from "@/hooks/useRestaurantIntelligence";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { DirectorModeToggle, type Mode } from "@/components/app/DirectorModeToggle";
 import { DirectorSummary } from "@/components/app/DirectorSummary";
@@ -91,7 +97,10 @@ function DashboardPage() {
     [],
   );
 
-  const health = useMemo(() => computeHealth(kpis), [kpis]);
+  const health = useMemo(
+    () => computeHealth(dishes, ingredients, recommendations, suppliers),
+    [dishes, ingredients, recommendations, suppliers],
+  );
   const night = useMemo(
     () => computeNightReport(dishes, ingredients, recommendations, suppliers),
     [dishes, ingredients, recommendations, suppliers],
@@ -323,11 +332,12 @@ function DashboardPage() {
                   key={rec.id}
                   rec={rec}
                   index={i}
-                  applied={applied.has(rec.id)}
+                  applied={appliedIds.has(rec.id)}
                   onApply={() => apply(rec.id)}
                   expanded={expanded === rec.id}
                   onToggleExpand={() => setExpanded((cur) => (cur === rec.id ? null : rec.id))}
                   restaurantName={restaurantName}
+                  ctx={ctx}
                 />
               ))}
             </div>
