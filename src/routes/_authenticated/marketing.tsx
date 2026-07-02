@@ -1,45 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
 import { Megaphone, Sparkles, TrendingUp } from "lucide-react";
+import { useRestaurantIntelligence, type Dish } from "@/hooks/useRestaurantIntelligence";
 
 export const Route = createFileRoute("/_authenticated/marketing")({
   head: () => ({ meta: [{ title: "Marketing — TuComité" }] }),
   component: MarketingPage,
 });
 
-type Dish = { id: string; name: string; sale_price: number | null; monthly_sales: number | null; margin: number | null };
-
 function MarketingPage() {
-  const [dishes, setDishes] = useState<Dish[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) return;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("restaurant_id")
-        .eq("id", uid)
-        .maybeSingle();
-      const rid = profile?.restaurant_id;
-      if (!rid) {
-        setLoading(false);
-        return;
-      }
-      const { data } = await supabase
-        .from("dishes")
-        .select("id,name,sale_price,monthly_sales,margin")
-        .eq("restaurant_id", rid);
-      setDishes((data ?? []) as Dish[]);
-      setLoading(false);
-    })();
-  }, []);
-
-  const promos = useMemo(() => buildPromos(dishes), [dishes]);
+  const { dishes, loading, kpis } = useRestaurantIntelligence();
+  const promos = useMemo(() => buildPromos(dishes, kpis.monthlyRevenue), [dishes, kpis.monthlyRevenue]);
 
   return (
     <AppShell>
@@ -106,22 +79,25 @@ function MarketingPage() {
   );
 }
 
-function buildPromos(dishes: Dish[]) {
+function buildPromos(dishes: Dish[], monthlyRevenue: number) {
   if (dishes.length === 0) return [] as { tag: string; title: string; description: string; impact: string }[];
   const top = [...dishes].sort((a, b) => (b.monthly_sales ?? 0) - (a.monthly_sales ?? 0))[0];
   const bestMargin = [...dishes].sort((a, b) => (b.margin ?? 0) - (a.margin ?? 0))[0];
+  const eur = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const uplift9 = Math.round(monthlyRevenue * 0.09);
+  const uplift6 = Math.round(monthlyRevenue * 0.06);
   const promos = [
     {
       tag: "Ticket medio",
       title: `Maridaje sugerido junto a ${top?.name ?? "tu plato estrella"}`,
       description: `Añade una copa recomendada en sala al pedir ${top?.name ?? "tu plato más vendido"}. Impacto directo en el ticket medio sin coste adicional de marketing.`,
-      impact: "+9% ticket medio",
+      impact: uplift9 > 0 ? `+${eur.format(uplift9)}/mes` : "+9% ticket medio",
     },
     {
       tag: "Frecuencia",
       title: `Postre del día con ${bestMargin?.name ?? "tu producto más rentable"}`,
       description: `Comunica un postre destacado de martes a jueves para elevar la ocupación en días valle. Producto con margen alto y baja fricción operativa.`,
-      impact: "+6% cubiertos entre semana",
+      impact: uplift6 > 0 ? `+${eur.format(uplift6)}/mes` : "+6% cubiertos entre semana",
     },
     {
       tag: "Redes sociales",
