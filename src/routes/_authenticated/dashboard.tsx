@@ -596,6 +596,7 @@ function RecommendationCard({
             </motion.div>
           )}
         </AnimatePresence>
+        <RecommendationRationale rec={rec} ctx={ctx} />
       </div>
     </motion.article>
   );
