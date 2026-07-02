@@ -13,6 +13,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRentabilidadRouteImport } from './routes/_authenticated/rentabilidad'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedInventarioRouteImport } from './routes/_authenticated/inventario'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -39,6 +40,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRentabilidadRoute =
+  AuthenticatedRentabilidadRouteImport.update({
+    id: '/rentabilidad',
+    path: '/rentabilidad',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
 }
 export interface FileRoutesByTo {
@@ -91,6 +99,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventario': typeof AuthenticatedInventarioRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
 }
 export interface FileRoutesById {
@@ -104,6 +113,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/inventario': typeof AuthenticatedInventarioRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/_authenticated/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
 }
 export interface FileRouteTypes {
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inventario'
     | '/onboarding'
+    | '/rentabilidad'
     | '/carta/$dishId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inventario'
     | '/onboarding'
+    | '/rentabilidad'
     | '/carta/$dishId'
   id:
     | '__root__'
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/inventario'
     | '/_authenticated/onboarding'
+    | '/_authenticated/rentabilidad'
     | '/_authenticated/carta/$dishId'
   fileRoutesById: FileRoutesById
 }
@@ -179,6 +192,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/rentabilidad': {
+      id: '/_authenticated/rentabilidad'
+      path: '/rentabilidad'
+      fullPath: '/rentabilidad'
+      preLoaderRoute: typeof AuthenticatedRentabilidadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
@@ -242,6 +262,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInventarioRoute: typeof AuthenticatedInventarioRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedRentabilidadRoute: typeof AuthenticatedRentabilidadRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -250,6 +271,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInventarioRoute: AuthenticatedInventarioRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedRentabilidadRoute: AuthenticatedRentabilidadRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
