@@ -105,7 +105,7 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--cream)] flex">
+    <div className="tc-light min-h-screen bg-[color:var(--cream)] flex relative z-0">
       {/* Left brand pane */}
       <div className="hidden lg:flex lg:w-[42%] xl:w-1/2 relative bg-charcoal text-cream overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--gold)_18%,transparent),transparent_60%)]" />
