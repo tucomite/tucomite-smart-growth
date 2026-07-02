@@ -27,11 +27,14 @@ export function Navbar() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <button onClick={() => scrollTo("hero")} className="flex items-center gap-2">
-            <span className="text-xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
+          <button onClick={() => scrollTo("hero")} className="flex items-center gap-2.5 group">
+            <Logo size={30} />
+            <span
+              className="text-xl font-semibold tracking-tight"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               TuComité
             </span>
-            <span className="hidden sm:inline-block h-1.5 w-1.5 rounded-full bg-gold" />
           </button>
 
           <div className="hidden md:flex items-center gap-8">
