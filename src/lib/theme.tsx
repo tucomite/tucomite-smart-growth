@@ -31,6 +31,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
+    // Apply the theme scope on <body> so Radix portals (dialog, dropdown,
+    // sheet, toast) — which mount outside the AppShell subtree — inherit the
+    // same design tokens and legacy-class remaps. Without this, portals render
+    // white surfaces on dark mode and unreadable text.
+    if (typeof document !== "undefined") {
+      const body = document.body;
+      const html = document.documentElement;
+      body.classList.remove("tc-dark", "tc-light");
+      html.classList.remove("tc-dark", "tc-light");
+      const cls = theme === "dark" ? "tc-dark" : "tc-light";
+      body.classList.add(cls);
+      html.classList.add(cls);
+      html.style.colorScheme = theme;
+    }
   }, [theme]);
 
   const value = useMemo<ThemeContextValue>(
