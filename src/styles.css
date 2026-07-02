@@ -130,9 +130,13 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-@utility auth-input-focus {
+.auth-input:focus,
+.auth-input:focus-visible {
   border-color: var(--charcoal);
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--charcoal) 8%, transparent);
   outline: none;
+}
+.auth-input::placeholder {
+  color: color-mix(in oklab, var(--charcoal) 35%, transparent);
 }
 
