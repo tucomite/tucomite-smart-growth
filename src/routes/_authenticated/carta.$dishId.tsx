@@ -236,39 +236,19 @@ function DishDetailPage() {
       unit: r.ingredients?.unit ?? "",
     }));
 
-  // Demo ingredient rows when the dish has none linked yet (dev fallback).
-  const demoIngredients = [
-    { name: "Ingrediente base", quantity: 0.2, unit: "kg", unitPrice: 6.8, supplier: "Distribuciones Mediterráneo" },
-    { name: "Aceite oliva virgen extra", quantity: 0.03, unit: "L", unitPrice: 6.8, supplier: "Distribuciones Mediterráneo" },
-    { name: "Ajo fresco", quantity: 0.01, unit: "kg", unitPrice: 3.2, supplier: "Distribuciones Mediterráneo" },
-    { name: "Especias de la casa", quantity: 0.005, unit: "kg", unitPrice: 24.0, supplier: "Bodega Ribera" },
-  ];
-
-  const ingredientRows =
-    ings.length > 0
-      ? ings.map((r) => {
-          const q = Number(r.quantity ?? 0);
-          const price = Number(r.ingredients?.current_price ?? 0);
-          return {
-            name: r.ingredients?.name ?? "—",
-            quantity: q,
-            unit: r.ingredients?.unit ?? "",
-            unitPrice: price,
-            total: q * price,
-            supplier:
-              suppliers.get(r.ingredients?.supplier_id ?? "")?.name ?? "Sin proveedor",
-            demo: false,
-          };
-        })
-      : demoIngredients.map((r) => ({
-          name: r.name,
-          quantity: r.quantity,
-          unit: r.unit,
-          unitPrice: r.unitPrice,
-          total: r.quantity * r.unitPrice,
-          supplier: r.supplier,
-          demo: true,
-        }));
+  const ingredientRows = ings.map((r) => {
+    const q = Number(r.quantity ?? 0);
+    const price = Number(r.ingredients?.current_price ?? 0);
+    return {
+      name: r.ingredients?.name ?? "—",
+      quantity: q,
+      unit: r.ingredients?.unit ?? "",
+      unitPrice: price,
+      total: q * price,
+      supplier:
+        suppliers.get(r.ingredients?.supplier_id ?? "")?.name ?? "Sin proveedor",
+    };
+  });
 
   // Impacto total esperado
   const currentRevenue = Number(dish.sale_price ?? 0) * monthlySales;
@@ -400,12 +380,20 @@ function DishDetailPage() {
           </Block>
 
           <Block icon={ShoppingBasket} eyebrow="Compras" title="Proveedores y costes">
-            {ings.length === 0 && (
-              <p className="text-xs text-charcoal/50 mb-4 inline-flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--gold)]" />
-                Datos demo de desarrollo — vincula ingredientes reales desde el módulo Inventario.
-              </p>
-            )}
+            {ingredientRows.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-charcoal/15 bg-[color:var(--cream)] p-8 text-center">
+                <p className="text-sm text-charcoal/70">
+                  El Chef IA aún no ha desglosado la receta de este plato.
+                </p>
+                <Link
+                  to="/inventario"
+                  className="inline-flex items-center gap-1.5 mt-3 text-sm text-charcoal font-medium hover:underline"
+                >
+                  Vincular ingredientes desde Inventario
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ) : (
             <div className="rounded-xl border border-charcoal/10 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-charcoal/[0.03] text-[11px] uppercase tracking-[0.12em] text-charcoal/50">
@@ -447,6 +435,7 @@ function DishDetailPage() {
                 </tfoot>
               </table>
             </div>
+            )}
             <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">
               <p className="text-xs text-charcoal/50">
                 {alternatives.length > 0
