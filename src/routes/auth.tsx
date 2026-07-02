@@ -154,7 +154,7 @@ function AuthPage() {
                   <button
                     onClick={handleGoogle}
                     disabled={loading}
-                    className="w-full h-11 rounded-lg border border-charcoal/15 bg-white hover:bg-charcoal/[0.02] transition-colors flex items-center justify-center gap-3 text-sm font-medium text-charcoal disabled:opacity-50"
+                    className="w-full h-11 rounded-lg border border-[color:var(--tc-line-strong)] bg-[color:var(--tc-elev)] hover:bg-[color:var(--tc-panel-hover)] transition-colors flex items-center justify-center gap-3 text-sm font-medium text-[color:var(--tc-text)] disabled:opacity-50"
                   >
                     <GoogleIcon />
                     Continuar con Google
