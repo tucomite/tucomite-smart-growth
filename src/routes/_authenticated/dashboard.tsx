@@ -35,7 +35,6 @@ import {
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { DirectorModeToggle, type Mode } from "@/components/app/DirectorModeToggle";
 import { DirectorSummary } from "@/components/app/DirectorSummary";
-import { CommitteeTimeline } from "@/components/app/CommitteeTimeline";
 import { CommitteeTimelineImpl } from "@/components/app/CommitteeTimeline";
 import { RecommendationRationale } from "@/components/app/RecommendationRationale";
 import { HealthRing } from "@/components/app/HealthRing";
