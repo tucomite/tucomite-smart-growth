@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/carta")({
+export const Route = createFileRoute("/_authenticated/carta/")({
   head: () => ({ meta: [{ title: "Carta — TuComité" }] }),
   component: CartaPage,
 });
