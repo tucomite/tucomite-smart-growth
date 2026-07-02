@@ -401,7 +401,7 @@ function DashboardPage() {
                     en vivo
                   </span>
                 </div>
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 [&_.text-charcoal]:!text-white [&_.text-charcoal\\/60]:!text-white/60 [&_.text-charcoal\\/50]:!text-white/45 [&_.bg-white]:!bg-white/[0.06] [&_.border-charcoal\\/15]:!border-white/[0.12] [&_.border-charcoal\\/10]:!border-white/[0.08] [&_.bg-charcoal\\/10]:!bg-white/[0.06]">
+                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 [&_.text-charcoal]:!text-white [&_.text-charcoal\/60]:!text-white/60 [&_.text-charcoal\/50]:!text-white/45 [&_.bg-white]:!bg-white/[0.06] [&_.border-charcoal\/15]:!border-white/[0.12] [&_.border-charcoal\/10]:!border-white/[0.08] [&_.bg-charcoal\/10]:!bg-white/[0.06]">
                   <CommitteeTimeline ctx={ctx} />
                 </div>
               </section>
@@ -641,7 +641,7 @@ function RecommendationCard({
                   </ul>
                 </PlanBlock>
 
-                <div className="[&_.text-charcoal]:!text-white [&_.text-charcoal\\/80]:!text-white/80 [&_.text-charcoal\\/60]:!text-white/60 [&_.text-charcoal\\/55]:!text-white/55 [&_.text-charcoal\\/50]:!text-white/50 [&_.bg-white]:!bg-white/[0.03] [&_.border-charcoal\\/10]:!border-white/[0.08]">
+                <div className="[&_.text-charcoal]:!text-white [&_.text-charcoal\/80]:!text-white/80 [&_.text-charcoal\/60]:!text-white/60 [&_.text-charcoal\/55]:!text-white/55 [&_.text-charcoal\/50]:!text-white/50 [&_.bg-white]:!bg-white/[0.03] [&_.border-charcoal\/10]:!border-white/[0.08]">
                   <RecommendationRationale rec={rec} ctx={ctx} />
                 </div>
               </div>
