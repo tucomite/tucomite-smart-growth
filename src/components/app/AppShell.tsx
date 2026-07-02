@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Logo } from "@/components/brand/Logo";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -96,10 +97,8 @@ export function AppShell({
     <div className="min-h-screen bg-[color:var(--tc-ink)] text-[color:var(--tc-text)] flex antialiased selection:bg-[color:var(--tc-gold)]/30">
       {/* Sidebar */}
       <aside className="hidden md:flex md:w-[248px] shrink-0 flex-col border-r border-[color:var(--tc-line)] bg-[color:var(--tc-surface)]">
-        <div className="px-4 pt-5 pb-4 flex items-center gap-2.5">
-          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[color:var(--tc-gold-light)] via-[color:var(--tc-gold)] to-[color:var(--tc-gold-dark)] flex items-center justify-center shadow-[0_0_24px_-6px_rgba(212,175,110,0.6)]">
-            <span className="font-heading text-[#0B0B0D] text-[15px] font-bold leading-none">T</span>
-          </div>
+        <div className="px-4 pt-5 pb-4 flex items-center gap-3">
+          <Logo size={36} glow />
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-medium tracking-tight text-white leading-none">TuComité</p>
             <p className="text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--tc-gold)] mt-1.5 leading-none">

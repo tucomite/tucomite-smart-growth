@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Logo } from "@/components/brand/Logo";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,10 +106,8 @@ function OnboardingPage() {
       {/* Top bar */}
       <header className="border-b border-charcoal/10 bg-[color:var(--cream)]/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded bg-[color:var(--gold)] flex items-center justify-center">
-              <span className="font-heading text-charcoal text-sm font-semibold">T</span>
-            </div>
+          <div className="flex items-center gap-2.5">
+            <Logo size={28} />
             <span className="font-heading text-charcoal text-sm">TuComité</span>
           </div>
           <button

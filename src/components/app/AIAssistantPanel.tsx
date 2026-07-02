@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Logo } from "@/components/brand/Logo";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowUp, X, MessageSquare } from "lucide-react";
 
@@ -59,14 +60,15 @@ export function AIAssistantPanel({
             <header className="px-5 pt-5 pb-4 border-b border-white/[0.05]">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-[color:var(--tc-gold)] to-[color:var(--tc-gold-dark)] text-black flex items-center justify-center shadow-[0_0_20px_-4px_rgba(212,175,110,0.55)]">
-                    <Sparkles className="w-4 h-4" />
-                  </span>
+                  <Logo size={32} glow />
                   <div className="min-w-0">
-                    <p className="text-sm text-white font-medium leading-tight">
+                    <p className="text-sm text-white font-medium leading-tight flex items-center gap-2">
                       TuComité AI
+                      <span className="text-[9px] uppercase tracking-[0.2em] text-[color:var(--tc-gold)] border border-[color:var(--tc-gold)]/40 rounded px-1.5 py-0.5 leading-none">
+                        Beta
+                      </span>
                     </p>
-                    <p className="text-[11px] text-white/50 leading-tight mt-0.5">
+                    <p className="text-[11px] text-white/50 leading-tight mt-1">
                       Tu Director de Operaciones
                     </p>
                   </div>
