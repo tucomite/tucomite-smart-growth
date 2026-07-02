@@ -1,38 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
 import { Star } from "lucide-react";
+import { useRestaurantIntelligence } from "@/hooks/useRestaurantIntelligence";
 
 export const Route = createFileRoute("/_authenticated/compras")({
   head: () => ({ meta: [{ title: "Compras — TuComité" }] }),
   component: ComprasPage,
 });
 
-type Sup = {
-  id: string;
-  name: string;
-  contact_name: string | null;
-  phone: string | null;
-  email: string | null;
-  delivery_time: string | null;
-  rating: number | null;
-};
-
 function ComprasPage() {
-  const [rows, setRows] = useState<Sup[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("suppliers")
-        .select("id,name,contact_name,phone,email,delivery_time,rating")
-        .order("name");
-      setRows((data ?? []) as Sup[]);
-      setLoading(false);
-    })();
-  }, []);
+  const intel = useRestaurantIntelligence();
+  const rows = useMemo(() => [...intel.suppliers].sort((a, b) => a.name.localeCompare(b.name)), [intel.suppliers]);
+  const loading = intel.loading;
   return (
     <AppShell>
       <div className="px-6 sm:px-10 lg:px-16 py-12 sm:py-16 max-w-6xl mx-auto">
@@ -50,11 +31,11 @@ function ComprasPage() {
             ))}
           {!loading &&
             rows.map((s) => (
-              <div key={s.id} className="rounded-2xl border border-charcoal/10 bg-white p-6">
+              <div key={s.id} className="rounded-2xl border border-charcoal/10 bg-white p-6 hover:border-charcoal/25 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="font-heading text-xl text-charcoal tracking-tight">{s.name}</h3>
-                    <p className="text-sm text-charcoal/60 mt-1">{s.contact_name}</p>
+                    <p className="text-sm text-charcoal/60 mt-1">Proveedor activo</p>
                   </div>
                   {s.rating != null && (
                     <span className="inline-flex items-center gap-1 text-sm text-charcoal">
@@ -63,14 +44,10 @@ function ComprasPage() {
                     </span>
                   )}
                 </div>
-                <dl className="mt-5 grid grid-cols-2 gap-y-3 text-sm">
-                  <dt className="text-charcoal/50">Teléfono</dt>
-                  <dd className="text-charcoal text-right">{s.phone ?? "—"}</dd>
-                  <dt className="text-charcoal/50">Email</dt>
-                  <dd className="text-charcoal text-right truncate">{s.email ?? "—"}</dd>
-                  <dt className="text-charcoal/50">Entrega</dt>
-                  <dd className="text-charcoal text-right">{s.delivery_time ?? "—"}</dd>
-                </dl>
+                <p className="mt-5 text-xs uppercase tracking-[0.15em] text-charcoal/40">Valoración del Comité</p>
+                <div className="mt-2 h-1.5 rounded-full bg-charcoal/[0.06] overflow-hidden">
+                  <div className="h-full bg-[color:var(--gold)]" style={{ width: `${((Number(s.rating ?? 0)) / 5) * 100}%` }} />
+                </div>
               </div>
             ))}
         </section>

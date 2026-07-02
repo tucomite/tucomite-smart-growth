@@ -49,6 +49,59 @@ export type Database = {
           },
         ]
       }
+      daily_snapshots: {
+        Row: {
+          avg_margin: number
+          created_at: string
+          date: string
+          id: string
+          recs_applied: number
+          recs_pending: number
+          restaurant_id: string
+          saved_applied: number
+          saved_detected: number
+          stock_value: number
+          updated_at: string
+          waste_estimate: number
+        }
+        Insert: {
+          avg_margin?: number
+          created_at?: string
+          date: string
+          id?: string
+          recs_applied?: number
+          recs_pending?: number
+          restaurant_id: string
+          saved_applied?: number
+          saved_detected?: number
+          stock_value?: number
+          updated_at?: string
+          waste_estimate?: number
+        }
+        Update: {
+          avg_margin?: number
+          created_at?: string
+          date?: string
+          id?: string
+          recs_applied?: number
+          recs_pending?: number
+          restaurant_id?: string
+          saved_applied?: number
+          saved_detected?: number
+          stock_value?: number
+          updated_at?: string
+          waste_estimate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_snapshots_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dish_ingredients: {
         Row: {
           created_at: string
@@ -481,7 +534,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      backfill_snapshots_30d: { Args: { rid: string }; Returns: undefined }
       current_restaurant_id: { Args: never; Returns: string }
+      refresh_daily_snapshot: { Args: { rid: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

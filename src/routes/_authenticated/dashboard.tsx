@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
@@ -27,52 +27,25 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  useRestaurantIntelligence,
+  type Recommendation as RecT,
+  type Dish as DishRow,
+  type Ingredient as IngredientRow,
+  type Supplier as SupplierRow,
+} from "@/hooks/useRestaurantIntelligence";
+import { AnimatedNumber } from "@/components/ui/animated-number";
+import { DirectorModeToggle, type Mode } from "@/components/app/DirectorModeToggle";
+import { DirectorSummary } from "@/components/app/DirectorSummary";
+import { CommitteeTimeline } from "@/components/app/CommitteeTimeline";
+import { RecommendationRationale } from "@/components/app/RecommendationRationale";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Centro de mando — TuComité" }] }),
   component: DashboardPage,
 });
 
-type RecommendationRow = {
-  id: string;
-  title: string;
-  problem: string | null;
-  cause: string | null;
-  solution: string | null;
-  economic_impact: number | null;
-  time_impact: string | null;
-  priority: string;
-  status: string;
-  updated_at?: string | null;
-  created_at?: string | null;
-};
-
-type ActivityRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  type: string | null;
-  created_at: string;
-};
-
-type DishRow = {
-  id: string;
-  name: string;
-  margin: number | null;
-  monthly_sales: number | null;
-  sale_price: number | null;
-};
-
-type IngredientRow = {
-  id: string;
-  name: string;
-  current_price: number | null;
-  stock_quantity: number | null;
-  expiration_date: string | null;
-  alternative_price: number | null;
-};
-
-type SupplierRow = { id: string; rating: number | null };
+type RecommendationRow = RecT;
 
 const PRIORITY_META: Record<
   string,
@@ -99,68 +72,21 @@ const currency = new Intl.NumberFormat("es-ES", {
 });
 
 function DashboardPage() {
-  const [restaurantName, setRestaurantName] = useState("");
-  const [userName, setUserName] = useState("");
-  const [recommendations, setRecommendations] = useState<RecommendationRow[]>([]);
-  const [activity, setActivity] = useState<ActivityRow[]>([]);
-  const [dishes, setDishes] = useState<DishRow[]>([]);
-  const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
-  const [suppliers, setSuppliers] = useState<SupplierRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [applied, setApplied] = useState<Set<string>>(new Set());
+  const ctx = useRestaurantIntelligence();
+  const { loading, restaurantName, userName, recommendations, dishes, ingredients, suppliers, kpis } = ctx;
   const [expanded, setExpanded] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, restaurant_id")
-        .eq("id", userData.user.id)
-        .maybeSingle();
-      setUserName(profile?.full_name || userData.user.email || "");
-      const rid = profile?.restaurant_id ?? null;
-      if (!rid) {
-        setLoading(false);
-        return;
-      }
-      const [{ data: restaurant }, { data: recs }, { data: acts }, { data: d }, { data: i }, { data: s }] =
-        await Promise.all([
-          supabase.from("restaurants").select("name").eq("id", rid).maybeSingle(),
-          supabase
-            .from("recommendations")
-            .select(
-              "id,title,problem,cause,solution,economic_impact,time_impact,priority,status,created_at,updated_at",
-            )
-            .eq("restaurant_id", rid)
-            .order("economic_impact", { ascending: false, nullsFirst: false }),
-          supabase
-            .from("committee_activity")
-            .select("id,title,description,type,created_at")
-            .eq("restaurant_id", rid)
-            .order("created_at", { ascending: false })
-            .limit(6),
-          supabase
-            .from("dishes")
-            .select("id,name,margin,monthly_sales,sale_price")
-            .eq("restaurant_id", rid),
-          supabase
-            .from("ingredients")
-            .select("id,name,current_price,stock_quantity,expiration_date,alternative_price")
-            .eq("restaurant_id", rid),
-          supabase.from("suppliers").select("id,rating").eq("restaurant_id", rid),
-        ]);
-      setRestaurantName(restaurant?.name || "");
-      setRecommendations((recs ?? []) as RecommendationRow[]);
-      setActivity((acts ?? []) as ActivityRow[]);
-      setDishes((d ?? []) as DishRow[]);
-      setIngredients((i ?? []) as IngredientRow[]);
-      setSuppliers((s ?? []) as SupplierRow[]);
-      setApplied(new Set((recs ?? []).filter((r) => r.status === "applied").map((r) => r.id as string)));
-      setLoading(false);
-    })();
-  }, []);
+  const [mode, setMode] = useState<Mode>(() => {
+    if (typeof window === "undefined") return "operativo";
+    return (window.localStorage.getItem("tucomite:mode") as Mode) || "operativo";
+  });
+  function changeMode(m: Mode) {
+    setMode(m);
+    if (typeof window !== "undefined") window.localStorage.setItem("tucomite:mode", m);
+  }
+  const appliedIds = useMemo(
+    () => new Set(recommendations.filter((r) => r.status === "applied").map((r) => r.id)),
+    [recommendations],
+  );
 
   const firstName = useMemo(() => (userName ? userName.split(" ")[0] : ""), [userName]);
   const today = useMemo(
@@ -188,7 +114,6 @@ function DashboardPage() {
   const pendingRecs = recommendations.filter((r) => r.status !== "applied");
 
   async function apply(id: string) {
-    setApplied((prev) => new Set(prev).add(id));
     const { error } = await supabase.from("recommendations").update({ status: "applied" }).eq("id", id);
     if (error) {
       toast.error("No se pudo aplicar la recomendación");
@@ -209,11 +134,13 @@ function DashboardPage() {
       }
     >
       <div className="px-6 sm:px-10 lg:px-16 py-12 sm:py-16 max-w-5xl mx-auto">
-        {/* Greeting */}
-        <motion.section
+        {/* Mode + greeting */}
+        <div className="flex items-start justify-between gap-6 mb-8 flex-wrap">
+          <motion.section
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="min-w-0"
         >
           <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--gold)] font-medium">
             {restaurantName || "Tu restaurante"} · Informe ejecutivo
@@ -224,7 +151,29 @@ function DashboardPage() {
           <p className="text-charcoal/60 text-lg mt-4 max-w-2xl leading-relaxed">
             El Comité ha terminado el análisis nocturno. Este es el estado de tu restaurante ahora mismo.
           </p>
-        </motion.section>
+          </motion.section>
+          <DirectorModeToggle mode={mode} onChange={changeMode} />
+        </div>
+
+        <AnimatePresence mode="wait">
+          {mode === "director" ? (
+            <motion.div
+              key="director"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4 }}
+            >
+              <DirectorSummary ctx={ctx} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="operativo"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4 }}
+            >
 
         {/* Live pulses */}
         {pulses.length > 0 && (
@@ -232,7 +181,7 @@ function DashboardPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="mt-8 flex flex-wrap gap-2"
+            className="flex flex-wrap gap-2"
           >
             {pulses.map((p, i) => (
               <motion.span
@@ -264,7 +213,7 @@ function DashboardPage() {
                 </p>
                 <div className="mt-5 flex items-baseline gap-2">
                   <span className="font-heading text-6xl sm:text-7xl text-charcoal tracking-tight tabular-nums">
-                    {health.score}
+                    <AnimatedNumber value={health.score} />
                   </span>
                   <span className="text-charcoal/40 text-lg">/100</span>
                 </div>
@@ -383,42 +332,31 @@ function DashboardPage() {
                   key={rec.id}
                   rec={rec}
                   index={i}
-                  applied={applied.has(rec.id)}
+                  applied={appliedIds.has(rec.id)}
                   onApply={() => apply(rec.id)}
                   expanded={expanded === rec.id}
                   onToggleExpand={() => setExpanded((cur) => (cur === rec.id ? null : rec.id))}
                   restaurantName={restaurantName}
+                  ctx={ctx}
                 />
               ))}
             </div>
           )}
         </section>
 
-        {/* Committee activity */}
-        {activity.length > 0 && (
-          <section className="mt-16">
-            <div className="flex items-baseline justify-between mb-6">
-              <h2 className="font-heading text-2xl text-charcoal tracking-tight">Actividad del Comité</h2>
-              <span className="text-xs uppercase tracking-[0.15em] text-charcoal/40">esta madrugada</span>
-            </div>
-            <ol className="rounded-2xl border border-charcoal/10 bg-white divide-y divide-charcoal/10 overflow-hidden">
-              {activity.map((a) => {
-                const Icon = (a.type && ACTIVITY_ICON[a.type]) || ClipboardList;
-                return (
-                  <li key={a.id} className="flex items-start gap-4 px-5 sm:px-6 py-4">
-                    <div className="w-9 h-9 rounded-lg bg-charcoal/[0.06] text-charcoal/70 flex items-center justify-center shrink-0">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-charcoal font-medium">{a.title}</p>
-                      {a.description && <p className="text-sm text-charcoal/60 mt-0.5">{a.description}</p>}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-        )}
+        {/* Committee activity — timeline */}
+        <section className="mt-16">
+          <div className="flex items-baseline justify-between mb-6">
+            <h2 className="font-heading text-2xl text-charcoal tracking-tight">Cronología del Comité</h2>
+            <span className="text-xs uppercase tracking-[0.15em] text-charcoal/40 inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              en vivo
+            </span>
+          </div>
+          <div className="rounded-2xl border border-charcoal/10 bg-white p-6 sm:p-7">
+            <CommitteeTimeline ctx={ctx} />
+          </div>
+        </section>
 
         {/* Signature */}
         <motion.section
@@ -441,6 +379,9 @@ function DashboardPage() {
             Este informe ha sido generado esta madrugada a partir de tu carta, tus proveedores y tu inventario más reciente.
           </p>
         </motion.section>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </AppShell>
   );
@@ -503,6 +444,7 @@ function RecommendationCard({
   expanded,
   onToggleExpand,
   restaurantName,
+  ctx,
 }: {
   rec: RecommendationRow;
   index: number;
@@ -511,6 +453,7 @@ function RecommendationCard({
   expanded: boolean;
   onToggleExpand: () => void;
   restaurantName: string;
+  ctx: import("@/hooks/useRestaurantIntelligence").Intelligence;
 }) {
   const meta = PRIORITY_META[rec.priority] ?? PRIORITY_META.medium;
   const Icon = meta.icon;
@@ -653,6 +596,7 @@ function RecommendationCard({
             </motion.div>
           )}
         </AnimatePresence>
+        <RecommendationRationale rec={rec} ctx={ctx} />
       </div>
     </motion.article>
   );
