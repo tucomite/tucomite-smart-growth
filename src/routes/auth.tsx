@@ -109,9 +109,8 @@ function AuthPage() {
             <ArrowLeft className="w-4 h-4" /> Volver a TuComité
           </Link>
           <div>
-            <div className="w-10 h-10 rounded-md bg-[color:var(--gold)] mb-8 flex items-center justify-center">
-              <span className="font-heading text-charcoal text-lg font-semibold">T</span>
-            </div>
+            <Logo size={72} glow alt="TuComité" />
+            <div className="h-8" />
             <h1 className="font-heading text-4xl xl:text-5xl leading-tight text-cream mb-6">
               El comité inteligente<br />para tu restaurante.
             </h1>

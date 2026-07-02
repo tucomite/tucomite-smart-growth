@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
