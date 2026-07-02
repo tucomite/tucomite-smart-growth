@@ -86,7 +86,7 @@ export function HistoryCharts({ snapshots }: { snapshots: DailySnapshot[] }) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "rgba(0,0,0,0.5)" }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "rgba(0,0,0,0.5)" }} tickLine={false} axisLine={false} width={40} />
-              <Tooltip content={<PrettyTooltip formatter={(v) => eur.format(Number(v))} />} />
+              <Tooltip content={<PrettyTooltip formatter={(v: number | string) => eur.format(Number(v))} />} />
               <Area type="monotone" dataKey="detected" stroke="oklch(0.75 0.14 85)" strokeWidth={2} fill="url(#detected)" />
               <Area type="monotone" dataKey="applied" stroke="oklch(0.22 0.02 265)" strokeWidth={2} fill="url(#applied)" />
             </AreaChart>
@@ -99,7 +99,7 @@ export function HistoryCharts({ snapshots }: { snapshots: DailySnapshot[] }) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "rgba(0,0,0,0.5)" }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "rgba(0,0,0,0.5)" }} tickLine={false} axisLine={false} width={40} domain={["auto", "auto"]} />
-              <Tooltip content={<PrettyTooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />} />
+              <Tooltip content={<PrettyTooltip formatter={(v: number | string) => `${Number(v).toFixed(1)}%`} />} />
               <Line type="monotone" dataKey="margin" stroke="oklch(0.6 0.18 75)" strokeWidth={2.5} dot={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -130,7 +130,7 @@ export function HistoryCharts({ snapshots }: { snapshots: DailySnapshot[] }) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "rgba(0,0,0,0.5)" }} tickLine={false} axisLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "rgba(0,0,0,0.5)" }} tickLine={false} axisLine={false} width={40} />
-              <Tooltip content={<PrettyTooltip formatter={(v) => eur.format(Number(v))} />} />
+              <Tooltip content={<PrettyTooltip formatter={(v: number | string) => eur.format(Number(v))} />} />
               <Area type="monotone" dataKey="stock" stroke="oklch(0.55 0.1 160)" strokeWidth={2} fill="url(#stock)" />
               <Line type="monotone" dataKey="waste" stroke="oklch(0.65 0.2 30)" strokeWidth={2} dot={false} />
             </AreaChart>
