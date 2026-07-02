@@ -102,8 +102,8 @@ export function AppShell({
       className={`${themeScopeClass(theme)} min-h-screen bg-[color:var(--tc-ink)] text-[color:var(--tc-text)] flex antialiased selection:bg-[color:var(--tc-gold)]/30`}
     >
       {/* Sidebar */}
-      <aside className="hidden md:flex md:w-[252px] shrink-0 flex-col border-r border-[color:var(--tc-line)] bg-[color:var(--tc-surface)]">
-        <div className="px-5 pt-6 pb-5 flex items-center gap-3">
+      <aside className="hidden md:flex md:w-[264px] shrink-0 flex-col border-r border-[color:var(--tc-line)] bg-[color:var(--tc-surface)]">
+        <div className="px-6 pt-7 pb-6 flex items-center gap-3">
           <Logo size={30} glow />
           <div className="min-w-0 flex-1">
             <p className="text-[13.5px] font-medium tracking-tight text-[color:var(--tc-text)] leading-none">TuComité</p>
@@ -114,15 +114,15 @@ export function AppShell({
         </div>
 
         {restaurantName && (
-          <div className="mx-3 mb-3 flex items-center gap-2 px-3 py-2 rounded-[10px] bg-[color:var(--tc-panel)] border border-[color:var(--tc-line)] cursor-default hover:bg-[color:var(--tc-panel-hover)] transition-colors">
+          <div className="mx-4 mb-4 flex items-center gap-2 px-3 py-2 rounded-[10px] bg-[color:var(--tc-panel)] border border-[color:var(--tc-line)] cursor-default hover:bg-[color:var(--tc-panel-hover)] transition-colors">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
             <span className="text-[12px] text-[color:var(--tc-text-dim)] truncate flex-1 font-medium">{restaurantName}</span>
             <ChevronsUpDown className="w-3 h-3 text-[color:var(--tc-text-mute)]" strokeWidth={1.8} />
           </div>
         )}
 
-        <nav className="px-3 pt-1 pb-4 space-y-[2px] flex-1 overflow-y-auto">
-          <p className="px-3 pt-2 pb-2.5 text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--tc-text-mute)] font-medium">
+        <nav className="px-4 pt-2 pb-4 space-y-[3px] flex-1 overflow-y-auto">
+          <p className="px-3 pt-2 pb-3 text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--tc-text-mute)] font-medium">
             Plataforma
           </p>
           {NAV.map((item) => {
@@ -135,14 +135,14 @@ export function AppShell({
               <Link
                 key={item.key}
                 to={item.to}
-                className={`group relative w-full flex items-center gap-2.5 px-3 h-8 rounded-[8px] text-[13px] transition-all duration-200 ${
+                className={`group relative w-full flex items-center gap-3 px-3 h-9 rounded-[8px] text-[13px] transition-all duration-200 ${
                   active
                     ? "bg-[color:var(--tc-panel-strong)] text-[color:var(--tc-text)] font-medium"
                     : "text-[color:var(--tc-text-dim)] hover:text-[color:var(--tc-text)] hover:bg-[color:var(--tc-panel)]"
                 }`}
               >
                 {active && (
-                  <span className="absolute -left-3 top-1.5 bottom-1.5 w-[2px] rounded-r-full bg-[color:var(--tc-gold)] shadow-[0_0_10px_rgba(201,169,114,0.55)]" />
+                  <span className="absolute -left-4 top-2 bottom-2 w-[2px] rounded-r-full bg-[color:var(--tc-gold)] shadow-[0_0_10px_rgba(201,169,114,0.5)]" />
                 )}
                 <Icon
                   strokeWidth={1.75}
@@ -158,9 +158,9 @@ export function AppShell({
           })}
         </nav>
 
-        <div className="p-3 space-y-3 border-t border-[color:var(--tc-line)]">
+        <div className="p-4 space-y-3 border-t border-[color:var(--tc-line)]">
           <SecurityCard />
-          <div className="flex items-center gap-2.5 px-2 py-2 rounded-[10px] hover:bg-[color:var(--tc-panel)] transition-colors">
+          <div className="flex items-center gap-2.5 px-2 py-2.5 rounded-[10px] hover:bg-[color:var(--tc-panel)] transition-colors">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[color:var(--tc-panel-strong)] to-[color:var(--tc-panel)] border border-[color:var(--tc-line-strong)] flex items-center justify-center text-[11px] text-[color:var(--tc-text)] font-semibold tracking-wide">
               {initials}
             </div>
@@ -185,7 +185,7 @@ export function AppShell({
 
       {/* Main column */}
       <div className="flex-1 min-w-0 flex flex-col">
-        <header className="h-14 flex items-center justify-between px-5 sm:px-8 border-b border-[color:var(--tc-line)] tc-glass sticky top-0 z-20">
+        <header className="h-[56px] flex items-center justify-between px-6 sm:px-10 border-b border-[color:var(--tc-line)] tc-glass sticky top-0 z-20">
           <div className="flex items-center gap-3 text-[12px] text-[color:var(--tc-text-dim)] min-w-0">
             {eyebrow ?? (
               <span className="inline-flex items-center gap-2">
