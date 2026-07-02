@@ -65,7 +65,7 @@ function DishDetailPage() {
   const [dish, setDish] = useState<Dish | null>(null);
   const [ings, setIngs] = useState<IngRow[]>([]);
   const [suppliers, setSuppliers] = useState<Map<string, Supplier>>(new Map());
-  const [recId, setRecId] = useState<string | null>(null);
+  const [recIds, setRecIds] = useState<string[]>([]);
   const [recApplied, setRecApplied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [celebrating, setCelebrating] = useState(false);
@@ -96,17 +96,15 @@ function DishDetailPage() {
         supabase
           .from("recommendations")
           .select("id,status")
-          .ilike("title", `%${(d as Dish).name}%`)
-          .maybeSingle(),
+          .ilike("title", `%${(d as Dish).name}%`),
       ]);
       setIngs((di ?? []) as unknown as IngRow[]);
       const map = new Map<string, Supplier>();
       for (const s of sup ?? []) map.set(s.id, s as Supplier);
       setSuppliers(map);
-      if (rec) {
-        setRecId(rec.id);
-        setRecApplied(rec.status === "applied");
-      }
+      const recs = (rec ?? []) as { id: string; status: string | null }[];
+      setRecIds(recs.map((r) => r.id));
+      setRecApplied(recs.length > 0 && recs.every((r) => r.status === "applied"));
       setLoading(false);
     })();
   }, [dishId]);
@@ -152,18 +150,18 @@ function DishDetailPage() {
 
   async function apply() {
     setCelebrating(true);
-    if (recId) {
+    if (recIds.length > 0) {
       const { error } = await supabase
         .from("recommendations")
         .update({ status: "applied" })
-        .eq("id", recId);
+        .in("id", recIds);
       if (error) {
         setCelebrating(false);
         toast.error("No se pudo aplicar");
         return;
       }
-      setRecApplied(true);
     }
+    setRecApplied(true);
     if (dish && Number(dish.recommended_price ?? 0) > 0) {
       await supabase
         .from("dishes")
