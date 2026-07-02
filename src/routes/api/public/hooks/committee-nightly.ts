@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/public/hooks/committee-nightly")({
 
           for (const rule of rules.data ?? []) {
             const drafts = buildDrafts(
-              rule,
+              rule as never,
               (dishes.data ?? []) as never,
               (ingredients.data ?? []) as DBIng[],
               (suppliers.data ?? []) as never,
@@ -98,7 +98,7 @@ export const Route = createFileRoute("/api/public/hooks/committee-nightly")({
                 title: d.title,
                 detail: d.detail,
                 reason: d.reason,
-                payload: d.payload,
+                payload: d.payload as never,
                 dedupe_key: d.dedupe,
                 applied_at: isAuto ? new Date().toISOString() : null,
               });

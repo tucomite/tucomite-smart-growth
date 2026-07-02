@@ -23,6 +23,7 @@ import { Route as AuthenticatedComiteRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedCartaIndexRouteImport } from './routes/_authenticated/carta.index'
 import { Route as AuthenticatedCartaDishIdRouteImport } from './routes/_authenticated/carta.$dishId'
+import { Route as ApiPublicHooksCommitteeNightlyRouteImport } from './routes/api/public/hooks/committee-nightly'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -95,6 +96,12 @@ const AuthenticatedCartaDishIdRoute =
     path: '/carta/$dishId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicHooksCommitteeNightlyRoute =
+  ApiPublicHooksCommitteeNightlyRouteImport.update({
+    id: '/api/public/hooks/committee-nightly',
+    path: '/api/public/hooks/committee-nightly',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
   '/carta/': typeof AuthenticatedCartaIndexRoute
+  '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +133,7 @@ export interface FileRoutesByTo {
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
   '/carta': typeof AuthenticatedCartaIndexRoute
+  '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,6 +151,7 @@ export interface FileRoutesById {
   '/_authenticated/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/_authenticated/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
   '/_authenticated/carta/': typeof AuthenticatedCartaIndexRoute
+  '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/rentabilidad'
     | '/carta/$dishId'
     | '/carta/'
+    | '/api/public/hooks/committee-nightly'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/rentabilidad'
     | '/carta/$dishId'
     | '/carta'
+    | '/api/public/hooks/committee-nightly'
   id:
     | '__root__'
     | '/'
@@ -190,6 +202,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rentabilidad'
     | '/_authenticated/carta/$dishId'
     | '/_authenticated/carta/'
+    | '/api/public/hooks/committee-nightly'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +210,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicHooksCommitteeNightlyRoute: typeof ApiPublicHooksCommitteeNightlyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -299,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCartaDishIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/committee-nightly': {
+      id: '/api/public/hooks/committee-nightly'
+      path: '/api/public/hooks/committee-nightly'
+      fullPath: '/api/public/hooks/committee-nightly'
+      preLoaderRoute: typeof ApiPublicHooksCommitteeNightlyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -336,6 +357,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicHooksCommitteeNightlyRoute: ApiPublicHooksCommitteeNightlyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
