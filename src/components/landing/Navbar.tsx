@@ -54,14 +54,20 @@ export function Navbar() {
             </button>
           </div>
 
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              to="/auth"
+              search={{ mode: "login" }}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+            >
+              Iniciar sesión
+            </Link>
             <Link
               to="/auth"
               search={{ mode: "register" }}
-              onClick={() => setMenuOpen(false)}
               className="rounded-full bg-charcoal px-5 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-charcoal/90 hover:shadow-lg"
             >
-              Solicitar auditoría
+              Crear cuenta
             </Link>
           </div>
 
@@ -92,11 +98,19 @@ export function Navbar() {
             </button>
             <Link
               to="/auth"
+              search={{ mode: "login" }}
+              onClick={() => setMenuOpen(false)}
+              className="block text-center w-full rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground"
+            >
+              Iniciar sesión
+            </Link>
+            <Link
+              to="/auth"
               search={{ mode: "register" }}
               onClick={() => setMenuOpen(false)}
               className="block text-center w-full rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-primary-foreground"
             >
-              Solicitar auditoría
+              Crear cuenta
             </Link>
           </div>
         </div>
