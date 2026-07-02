@@ -14,7 +14,7 @@ export function SecurityCard() {
     <div className="relative rounded-xl border border-white/[0.06] bg-gradient-to-b from-white/[0.03] to-transparent p-3.5 overflow-hidden">
       <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-[color:var(--tc-gold)]/10 blur-2xl pointer-events-none" />
       <div className="relative flex items-center gap-2 mb-2.5">
-        <span className="w-6 h-6 rounded-md bg-[color:var(--tc-gold)]/12 text-[color:var(--tc-gold)] flex items-center justify-center">
+        <span className="w-6 h-6 rounded-md bg-[color:var(--tc-gold)]/[0.12] text-[color:var(--tc-gold)] flex items-center justify-center">
           <Shield className="w-3.5 h-3.5" />
         </span>
         <div className="min-w-0 flex-1">
