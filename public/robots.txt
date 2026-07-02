@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /onboarding
+Disallow: /carta
+Disallow: /inventario
+Disallow: /compras
+Disallow: /rentabilidad
+Disallow: /comite
+Disallow: /marketing
+Disallow: /ajustes
+Disallow: /auth
+Disallow: /reset-password
+
+# Block aggressive AI training scrapers
+User-agent: GPTBot
+Disallow: /
+User-agent: CCBot
+Disallow: /
+User-agent: ClaudeBot
+Disallow: /
+User-agent: anthropic-ai
+Disallow: /
+User-agent: Google-Extended
+Disallow: /

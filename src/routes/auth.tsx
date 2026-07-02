@@ -8,6 +8,18 @@ import { Loader2, ArrowRight, ArrowLeft } from "lucide-react";
 
 type Mode = "login" | "register" | "forgot";
 
+// Prevent open-redirect: only accept same-origin absolute paths that do not
+// try to escape via protocol-relative URLs or backslash tricks.
+function sanitizeRedirect(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const v = value.trim();
+  if (!v.startsWith("/")) return undefined;
+  if (v.startsWith("//") || v.startsWith("/\\")) return undefined;
+  if (/[\r\n\t]/.test(v)) return undefined;
+  if (v.length > 512) return undefined;
+  return v;
+}
+
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     redirect: sanitizeRedirect(s.redirect),
