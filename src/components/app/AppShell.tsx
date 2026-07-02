@@ -4,9 +4,10 @@ import {
   LayoutDashboard,
   BookOpen,
   Package,
-  ShoppingBasket,
+  Truck,
   TrendingUp,
   Sparkles,
+  Megaphone,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -17,18 +18,20 @@ export type NavKey =
   | "resumen"
   | "carta"
   | "inventario"
-  | "compras"
+  | "proveedores"
   | "rentabilidad"
   | "comite"
+  | "marketing"
   | "ajustes";
 
 const NAV: Array<{ key: NavKey; label: string; to: string; icon: typeof BookOpen }> = [
-  { key: "resumen", label: "Resumen", to: "/dashboard", icon: LayoutDashboard },
+  { key: "resumen", label: "Centro de mando", to: "/dashboard", icon: LayoutDashboard },
   { key: "carta", label: "Carta", to: "/carta", icon: BookOpen },
   { key: "inventario", label: "Inventario", to: "/inventario", icon: Package },
-  { key: "compras", label: "Compras", to: "/compras", icon: ShoppingBasket },
+  { key: "proveedores", label: "Proveedores", to: "/compras", icon: Truck },
   { key: "rentabilidad", label: "Rentabilidad", to: "/rentabilidad", icon: TrendingUp },
   { key: "comite", label: "Comité IA", to: "/comite", icon: Sparkles },
+  { key: "marketing", label: "Marketing", to: "/marketing", icon: Megaphone },
   { key: "ajustes", label: "Ajustes", to: "/ajustes", icon: Settings },
 ];
 
