@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          onboarding_completed: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          onboarding_completed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          onboarding_completed?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      restaurants: {
+        Row: {
+          business_type: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          cuisine_type: string | null
+          employees_range: string | null
+          id: string
+          locations_count: string | null
+          menu_source: string | null
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          business_type?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          cuisine_type?: string | null
+          employees_range?: string | null
+          id?: string
+          locations_count?: string | null
+          menu_source?: string | null
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          business_type?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          cuisine_type?: string | null
+          employees_range?: string | null
+          id?: string
+          locations_count?: string | null
+          menu_source?: string | null
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
