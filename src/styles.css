@@ -127,61 +127,64 @@
    ===================================================================== */
 .tc-dark {
   color-scheme: dark;
-  --tc-ink: #0B0B0D;
-  --tc-surface: #101014;
-  --tc-surface-2: #16161b;
-  --tc-elev: #1c1c22;
-  --tc-line: rgba(255,255,255,0.06);
-  --tc-line-strong: rgba(255,255,255,0.11);
+  /* Enterprise dark — negro profundo → grafito → elevación cálida */
+  --tc-ink: #08080A;
+  --tc-surface: #0D0D10;
+  --tc-surface-2: #131318;
+  --tc-elev: #191921;
+  --tc-line: rgba(255,255,255,0.055);
+  --tc-line-strong: rgba(255,255,255,0.10);
   --tc-text: #F5F1EA;
-  --tc-text-dim: rgba(245,241,234,0.68);
-  --tc-text-mute: rgba(245,241,234,0.44);
+  --tc-text-dim: rgba(245,241,234,0.66);
+  --tc-text-mute: rgba(245,241,234,0.40);
   --tc-fg: #FFFFFF;
   --tc-fg-mute: rgba(255,255,255,0.55);
-  --tc-panel: rgba(255,255,255,0.03);
-  --tc-panel-strong: rgba(255,255,255,0.06);
-  --tc-panel-hover: rgba(255,255,255,0.05);
-  --tc-input-bg: rgba(255,255,255,0.04);
-  --tc-input-bg-focus: rgba(255,255,255,0.06);
+  --tc-panel: rgba(255,255,255,0.028);
+  --tc-panel-strong: rgba(255,255,255,0.058);
+  --tc-panel-hover: rgba(255,255,255,0.046);
+  --tc-input-bg: rgba(255,255,255,0.035);
+  --tc-input-bg-focus: rgba(255,255,255,0.055);
   --tc-scrim: rgba(0,0,0,0.45);
-  --tc-gold: #D4AF6E;
-  --tc-gold-light: #E8CB93;
-  --tc-gold-dark: #A88445;
+  /* Dorado premium contenido — sin amarillo ni naranja */
+  --tc-gold: #C9A972;
+  --tc-gold-light: #E1C99A;
+  --tc-gold-dark: #9C7F48;
   --tc-gold-contrast: #0B0B0D;
-  --tc-glow: 0 0 40px -12px rgba(212,175,110,0.35);
-  --tc-shadow-sm: 0 2px 8px -2px rgba(0,0,0,0.4);
-  --tc-shadow-md: 0 12px 30px -12px rgba(0,0,0,0.55);
-  --tc-shadow-lg: 0 30px 80px -30px rgba(0,0,0,0.75);
+  --tc-glow: 0 0 44px -14px rgba(201,169,114,0.28);
+  --tc-shadow-sm: 0 1px 2px rgba(0,0,0,0.35), 0 2px 8px -4px rgba(0,0,0,0.45);
+  --tc-shadow-md: 0 4px 12px -4px rgba(0,0,0,0.5), 0 16px 40px -18px rgba(0,0,0,0.6);
+  --tc-shadow-lg: 0 30px 90px -32px rgba(0,0,0,0.8);
 }
 
 .tc-light {
   color-scheme: light;
-  /* Fondo gris muy claro cálido — no blanco puro, no crema */
-  --tc-ink: #F1EFEA;
-  --tc-surface: #F8F6F1;
-  --tc-surface-2: #FBFAF6;
+  /* Enterprise light — gris piedra cálido estilo Apple / Arc / Notion */
+  --tc-ink: #EEECE6;
+  --tc-surface: #F4F2EC;
+  --tc-surface-2: #F9F7F2;
   --tc-elev: #FFFFFF;
-  --tc-line: rgba(11,11,13,0.08);
-  --tc-line-strong: rgba(11,11,13,0.14);
-  --tc-text: #0F1013;
-  --tc-text-dim: rgba(15,16,19,0.66);
-  --tc-text-mute: rgba(15,16,19,0.42);
+  --tc-line: rgba(11,11,13,0.07);
+  --tc-line-strong: rgba(11,11,13,0.12);
+  --tc-text: #0E0F12;
+  --tc-text-dim: rgba(14,15,18,0.64);
+  --tc-text-mute: rgba(14,15,18,0.40);
   --tc-fg: #0F1013;
   --tc-fg-mute: rgba(15,16,19,0.55);
-  --tc-panel: rgba(15,16,19,0.03);
-  --tc-panel-strong: rgba(15,16,19,0.055);
-  --tc-panel-hover: rgba(15,16,19,0.05);
-  --tc-input-bg: rgba(255,255,255,0.85);
+  --tc-panel: rgba(15,16,19,0.028);
+  --tc-panel-strong: rgba(15,16,19,0.05);
+  --tc-panel-hover: rgba(15,16,19,0.045);
+  --tc-input-bg: rgba(255,255,255,0.9);
   --tc-input-bg-focus: #FFFFFF;
-  --tc-scrim: rgba(15,16,19,0.28);
-  --tc-gold: #8A6A2C;
-  --tc-gold-light: #B08A44;
-  --tc-gold-dark: #6E5320;
+  --tc-scrim: rgba(15,16,19,0.24);
+  /* Dorado sobrio en claro — evita brillos amarillos */
+  --tc-gold: #8B6A2E;
+  --tc-gold-light: #A88544;
+  --tc-gold-dark: #6B5121;
   --tc-gold-contrast: #FFFFFF;
-  --tc-glow: 0 0 30px -10px rgba(138,106,44,0.25);
-  --tc-shadow-sm: 0 1px 2px rgba(15,16,19,0.06), 0 2px 6px -2px rgba(15,16,19,0.08);
-  --tc-shadow-md: 0 8px 24px -10px rgba(15,16,19,0.12);
-  --tc-shadow-lg: 0 30px 80px -30px rgba(15,16,19,0.18);
+  --tc-glow: 0 0 32px -12px rgba(139,106,46,0.20);
+  --tc-shadow-sm: 0 1px 2px rgba(15,16,19,0.04), 0 2px 6px -3px rgba(15,16,19,0.06);
+  --tc-shadow-md: 0 4px 12px -6px rgba(15,16,19,0.08), 0 16px 40px -20px rgba(15,16,19,0.10);
+  --tc-shadow-lg: 0 30px 80px -30px rgba(15,16,19,0.14);
 }
 
 /* Sutil textura de "papel" para el modo claro Enterprise */
@@ -257,16 +260,19 @@
   --tc-card-bg: var(--tc-elev);
   --tc-card-border: var(--tc-line);
 }
+.tc-dark {
+  --tc-card-bg: linear-gradient(180deg, rgba(255,255,255,0.022) 0%, rgba(255,255,255,0) 55%), #14141A;
+}
 .tc-light {
-  /* Boost card contrast in light mode with soft top-lit gradient */
-  --tc-card-bg: linear-gradient(180deg, #FFFFFF 0%, #FBFAF6 100%);
+  /* Soft top-lit gradient on white paper */
+  --tc-card-bg: linear-gradient(180deg, #FFFFFF 0%, #FBFAF5 100%);
 }
 
 /* Utility classes that pages may adopt for extra polish */
 @utility tc-card {
   background: var(--tc-card-bg);
   border: 1px solid var(--tc-card-border);
-  border-radius: var(--tc-radius-lg);
+  border-radius: var(--tc-radius-xl);
   box-shadow: var(--tc-shadow-sm);
 }
 @utility tc-card-elevated {
@@ -274,6 +280,97 @@
   border: 1px solid var(--tc-line-strong);
   border-radius: var(--tc-radius-xl);
   box-shadow: var(--tc-shadow-md);
+}
+
+/* Glass surface — used by header and floating panels */
+@utility tc-glass {
+  background: color-mix(in oklab, var(--tc-ink) 72%, transparent);
+  backdrop-filter: blur(18px) saturate(140%);
+  border-bottom: 1px solid var(--tc-line);
+}
+
+/* Unified button family — primary/secondary/ghost */
+@utility tc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: background-color 180ms var(--tc-ease), border-color 180ms var(--tc-ease), color 180ms var(--tc-ease), box-shadow 200ms var(--tc-ease), transform 200ms var(--tc-ease);
+  border: 1px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+}
+@utility tc-btn-primary {
+  background: linear-gradient(180deg, var(--tc-gold-light) 0%, var(--tc-gold) 60%, var(--tc-gold-dark) 100%);
+  color: var(--tc-gold-contrast);
+  border-color: color-mix(in oklab, var(--tc-gold-dark) 40%, transparent);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, var(--tc-glow);
+}
+.tc-btn-primary:hover { filter: brightness(1.06); box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 0 50px -12px color-mix(in oklab, var(--tc-gold) 60%, transparent); }
+.tc-btn-primary:active { transform: translateY(0.5px); filter: brightness(0.97); }
+@utility tc-btn-secondary {
+  background: var(--tc-panel-strong);
+  color: var(--tc-text);
+  border-color: var(--tc-line-strong);
+}
+.tc-btn-secondary:hover { background: var(--tc-panel-hover); border-color: var(--tc-line-strong); }
+@utility tc-btn-ghost {
+  background: transparent;
+  color: var(--tc-text-dim);
+  border-color: transparent;
+}
+.tc-btn-ghost:hover { color: var(--tc-text); background: var(--tc-panel); }
+
+/* Badges / chips */
+@utility tc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 22px;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: var(--tc-panel-strong);
+  border: 1px solid var(--tc-line);
+  color: var(--tc-text-dim);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+@utility tc-badge-gold {
+  background: color-mix(in oklab, var(--tc-gold) 12%, transparent);
+  border-color: color-mix(in oklab, var(--tc-gold) 30%, transparent);
+  color: var(--tc-gold);
+}
+
+/* Section eyebrow */
+@utility tc-eyebrow {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tc-text-mute);
+  font-weight: 500;
+}
+
+/* Fine hairline divider */
+@utility tc-divider {
+  height: 1px;
+  width: 100%;
+  background: var(--tc-line);
+}
+
+/* Focus ring shared by every interactive element */
+.tc-dark :where(button, [role="button"], a):focus-visible,
+.tc-light :where(button, [role="button"], a):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--tc-ink), 0 0 0 4px color-mix(in oklab, var(--tc-gold) 55%, transparent);
+  border-radius: 10px;
 }
 
 /* Native form controls follow the theme */
