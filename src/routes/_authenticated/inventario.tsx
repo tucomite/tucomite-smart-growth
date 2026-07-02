@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
+import { useRestaurantIntelligence } from "@/hooks/useRestaurantIntelligence";
 
 export const Route = createFileRoute("/_authenticated/inventario")({
   head: () => ({ meta: [{ title: "Inventario — TuComité" }] }),
@@ -23,18 +23,16 @@ const currency = new Intl.NumberFormat("es-ES", { style: "currency", currency: "
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" });
 
 function InventarioPage() {
-  const [rows, setRows] = useState<Row[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("ingredients")
-        .select("id,name,unit,current_price,stock_quantity,stock_minimum,expiration_date")
-        .order("expiration_date", { ascending: true, nullsFirst: false });
-      setRows((data ?? []) as Row[]);
-      setLoading(false);
-    })();
-  }, []);
+  const { ingredients, loading } = useRestaurantIntelligence();
+  const rows = useMemo(
+    () =>
+      [...ingredients].sort((a, b) => {
+        if (!a.expiration_date) return 1;
+        if (!b.expiration_date) return -1;
+        return a.expiration_date.localeCompare(b.expiration_date);
+      }),
+    [ingredients],
+  );
   return (
     <AppShell>
       <div className="px-6 sm:px-10 lg:px-16 py-12 sm:py-16 max-w-6xl mx-auto">
