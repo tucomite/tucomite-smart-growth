@@ -54,7 +54,7 @@ export function AIAssistantPanel({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed lg:sticky top-0 right-0 h-screen w-[360px] max-w-[92vw] shrink-0 border-l border-white/[0.06] bg-[#0E0E11] flex flex-col z-40"
+            className="fixed top-0 right-0 h-screen w-[360px] max-w-[92vw] shrink-0 border-l border-white/[0.06] bg-[#0E0E11] flex flex-col z-40 shadow-[-20px_0_60px_-20px_rgba(0,0,0,0.6)]"
           >
             <header className="px-5 pt-5 pb-4 border-b border-white/[0.05]">
               <div className="flex items-start justify-between gap-3">
