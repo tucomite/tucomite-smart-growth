@@ -9,6 +9,9 @@ import {
   BarChart3,
   Check,
   Sparkles,
+  TrendingUp,
+  ArrowRight,
+  GitCompare,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
