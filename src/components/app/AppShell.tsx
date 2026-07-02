@@ -10,9 +10,14 @@ import {
   Megaphone,
   Settings,
   LogOut,
+  Command,
+  MessageSquare,
+  ChevronsUpDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SecurityCard } from "./SecurityCard";
+import { AIAssistantPanel } from "./AIAssistantPanel";
 
 export type NavKey =
   | "resumen"
@@ -45,16 +50,24 @@ export function AppShell({
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [restaurantName, setRestaurantName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [aiOpen, setAiOpen] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return window.matchMedia?.("(min-width: 1280px)").matches ?? true;
+  });
 
   useEffect(() => {
     (async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
+      setUserEmail(userData.user.email ?? "");
       const { data: profile } = await supabase
         .from("profiles")
-        .select("restaurant_id")
+        .select("restaurant_id, full_name")
         .eq("id", userData.user.id)
         .maybeSingle();
+      setUserName(profile?.full_name ?? "");
       if (!profile?.restaurant_id) return;
       const { data: r } = await supabase
         .from("restaurants")
@@ -71,16 +84,42 @@ export function AppShell({
     navigate({ to: "/" });
   }
 
+  const initials = (userName || userEmail || "TC")
+    .split(/\s+|@/)
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
-    <div className="min-h-screen bg-[color:var(--cream)] flex">
-      <aside className="hidden md:flex md:w-60 flex-col border-r border-charcoal/10 bg-white/40 p-5">
-        <div className="flex items-center gap-2.5 mb-10 px-2">
-          <div className="w-7 h-7 rounded bg-[color:var(--gold)] flex items-center justify-center">
-            <span className="font-heading text-charcoal text-sm font-semibold">T</span>
+    <div className="min-h-screen bg-[color:var(--tc-ink)] text-[color:var(--tc-text)] flex antialiased selection:bg-[color:var(--tc-gold)]/30">
+      {/* Sidebar */}
+      <aside className="hidden md:flex md:w-[248px] shrink-0 flex-col border-r border-[color:var(--tc-line)] bg-[color:var(--tc-surface)]">
+        <div className="px-4 pt-5 pb-4 flex items-center gap-2.5">
+          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[color:var(--tc-gold-light)] via-[color:var(--tc-gold)] to-[color:var(--tc-gold-dark)] flex items-center justify-center shadow-[0_0_24px_-6px_rgba(212,175,110,0.6)]">
+            <span className="font-heading text-[#0B0B0D] text-[15px] font-bold leading-none">T</span>
           </div>
-          <span className="font-heading text-charcoal text-sm">TuComité</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-medium tracking-tight text-white leading-none">TuComité</p>
+            <p className="text-[9.5px] uppercase tracking-[0.22em] text-[color:var(--tc-gold)] mt-1.5 leading-none">
+              Beta · v1.0
+            </p>
+          </div>
         </div>
-        <nav className="space-y-0.5 flex-1">
+
+        {restaurantName && (
+          <div className="mx-3 mt-2 mb-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] cursor-default">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[12px] text-white/75 truncate flex-1">{restaurantName}</span>
+            <ChevronsUpDown className="w-3 h-3 text-white/30" />
+          </div>
+        )}
+
+        <nav className="px-3 pt-1 pb-4 space-y-0.5 flex-1 overflow-y-auto">
+          <p className="px-3 pt-1 pb-2 text-[10px] uppercase tracking-[0.18em] text-white/30">
+            Plataforma
+          </p>
           {NAV.map((item) => {
             const Icon = item.icon;
             const active =
@@ -91,52 +130,91 @@ export function AppShell({
               <Link
                 key={item.key}
                 to={item.to}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                className={`group relative w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-200 ${
                   active
-                    ? "bg-charcoal/[0.06] text-charcoal font-medium"
-                    : "text-charcoal/60 hover:bg-charcoal/[0.04] hover:text-charcoal"
+                    ? "bg-white/[0.06] text-white"
+                    : "text-white/55 hover:text-white hover:bg-white/[0.03]"
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                {item.label}
+                {active && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-[color:var(--tc-gold)]" />
+                )}
+                <Icon className={`w-4 h-4 ${active ? "text-[color:var(--tc-gold)]" : "text-white/45 group-hover:text-white/70"} transition-colors`} />
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}
         </nav>
-        <div className="pt-4 border-t border-charcoal/10 mt-4">
-          {restaurantName && (
-            <p className="px-3 text-[11px] uppercase tracking-[0.15em] text-charcoal/40 mb-2">
-              {restaurantName}
-            </p>
-          )}
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-charcoal/60 hover:text-charcoal hover:bg-charcoal/[0.04] transition-colors"
-          >
-            <LogOut className="w-4 h-4" /> Cerrar sesión
-          </button>
+
+        <div className="p-3 space-y-2.5">
+          <SecurityCard />
+          <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white/[0.03] transition-colors">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/10 flex items-center justify-center text-[11px] text-white/85 font-medium">
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[12.5px] text-white truncate leading-tight">
+                {userName || userEmail || "Usuario"}
+              </p>
+              <p className="text-[10.5px] text-white/40 truncate leading-tight mt-0.5">
+                Owner
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="text-white/40 hover:text-white p-1 rounded transition-colors"
+              aria-label="Cerrar sesión"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0">
-        <header className="border-b border-charcoal/10 px-6 sm:px-10 py-4 flex items-center justify-between bg-[color:var(--cream)]/80 backdrop-blur sticky top-0 z-10">
-          <div className="flex items-center gap-3 text-xs text-charcoal/50">
+      {/* Main column */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <header className="h-14 flex items-center justify-between px-5 sm:px-8 border-b border-[color:var(--tc-line)] bg-[color:var(--tc-ink)]/85 backdrop-blur-xl sticky top-0 z-20">
+          <div className="flex items-center gap-3 text-xs text-white/50 min-w-0">
             {eyebrow ?? (
               <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Comité activo
               </span>
             )}
           </div>
-          <button
-            onClick={handleLogout}
-            className="md:hidden text-sm text-charcoal/60 hover:text-charcoal"
-          >
-            Salir
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              className="hidden sm:inline-flex items-center gap-2 h-8 px-2.5 rounded-md border border-white/[0.08] bg-white/[0.02] text-[12px] text-white/55 hover:text-white hover:border-white/[0.15] transition-all"
+              type="button"
+            >
+              <Command className="w-3.5 h-3.5" />
+              <span>Buscar</span>
+              <kbd className="text-[10px] text-white/40 border border-white/10 rounded px-1 py-0.5 ml-2">
+                ⌘K
+              </kbd>
+            </button>
+            <button
+              onClick={() => setAiOpen((v) => !v)}
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-[color:var(--tc-gold)]/10 border border-[color:var(--tc-gold)]/20 text-[12px] text-[color:var(--tc-gold)] hover:bg-[color:var(--tc-gold)]/15 transition-all"
+              type="button"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Comité AI</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="md:hidden text-[12px] text-white/60 hover:text-white"
+            >
+              Salir
+            </button>
+          </div>
         </header>
-        {children}
-      </main>
+
+        <div className="flex-1 min-w-0 flex">
+          <div className="flex-1 min-w-0">{children}</div>
+          <AIAssistantPanel open={aiOpen} onClose={() => setAiOpen(false)} />
+        </div>
+      </div>
     </div>
   );
 }
