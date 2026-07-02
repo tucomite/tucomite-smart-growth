@@ -144,9 +144,9 @@ function AuthPage() {
                 {mode === "forgot" && "Recupera tu acceso"}
               </h2>
               <p className="text-charcoal/60 text-sm mt-2 mb-8">
-                {mode === "login" && "Accede a tu comité."}
-                {mode === "register" && "Empieza tu auditoría en 3 minutos."}
-                {mode === "forgot" && "Te enviaremos un enlace por email."}
+                {mode === "login" && "Accede al centro de decisiones de tu restaurante."}
+                {mode === "register" && "Activa tu comité inteligente en menos de 3 minutos."}
+                {mode === "forgot" && "Te enviaremos un enlace seguro para restablecer tu acceso."}
               </p>
 
               {mode !== "forgot" && (
@@ -157,7 +157,7 @@ function AuthPage() {
                     className="w-full h-11 rounded-lg border border-[color:var(--tc-line-strong)] bg-[color:var(--tc-elev)] hover:bg-[color:var(--tc-panel-hover)] transition-colors flex items-center justify-center gap-3 text-sm font-medium text-[color:var(--tc-text)] disabled:opacity-50"
                   >
                     <GoogleIcon />
-                    Continuar con Google
+                    Acceder con Google
                   </button>
                   <div className="flex items-center gap-4 my-6">
                     <div className="h-px flex-1 bg-charcoal/10" />
