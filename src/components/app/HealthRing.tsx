@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 export function HealthRing({
   score,
   state,
-  size = 220,
+  size = 260,
 }: {
   score: number;
   state: string;
   size?: number;
 }) {
-  const stroke = 10;
+  const stroke = 8;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(100, score));
@@ -50,7 +50,7 @@ export function HealthRing({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke="rgba(255,255,255,0.06)"
+          stroke="color-mix(in oklab, var(--tc-text) 8%, transparent)"
           strokeWidth={stroke}
           fill="none"
         />
@@ -70,16 +70,16 @@ export function HealthRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+        <p className="text-[10px] uppercase tracking-[0.24em] text-[color:var(--tc-text-mute)]">
           Salud
         </p>
-        <div className="flex items-baseline gap-1 mt-1">
-          <span className="font-heading text-6xl text-white tracking-tight tabular-nums">
+        <div className="flex items-baseline gap-1 mt-2">
+          <span className="font-heading text-[76px] leading-none text-[color:var(--tc-text)] tracking-[-0.03em] tabular-nums">
             {display}
           </span>
-          <span className="text-white/35 text-lg">/100</span>
+          <span className="text-[color:var(--tc-text-mute)] text-base tracking-tight">/100</span>
         </div>
-        <span className="mt-1.5 text-xs text-[color:var(--tc-gold)] tracking-wide">
+        <span className="mt-2.5 text-[11px] uppercase tracking-[0.2em] text-[color:var(--tc-gold)] font-medium">
           {state}
         </span>
       </div>
