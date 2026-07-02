@@ -435,18 +435,25 @@ function RecommendationCard({
   applied,
   onApply,
 }: {
-  rec: Recommendation;
+  rec: RecommendationRow;
   index: number;
   applied: boolean;
   onApply: () => void;
 }) {
-  const Icon = rec.icon;
+  const meta = PRIORITY_META[rec.priority] ?? PRIORITY_META.medium;
+  const Icon = meta.icon;
   const toneAccent =
-    rec.tone === "gold"
+    meta.tone === "gold"
       ? "bg-[color:var(--gold)]/15 text-[color:var(--gold)]"
-      : rec.tone === "warn"
+      : meta.tone === "warn"
         ? "bg-amber-500/10 text-amber-700"
         : "bg-charcoal/[0.06] text-charcoal/70";
+  const impactText = rec.economic_impact
+    ? `+ ${currency.format(Number(rec.economic_impact))} / mes`
+    : rec.time_impact
+      ? `Ahorra ${rec.time_impact}`
+      : "";
+  const impactLabel = rec.economic_impact ? "impacto estimado" : rec.time_impact ? "impacto en tiempo" : "";
 
   return (
     <motion.article
@@ -464,32 +471,36 @@ function RecommendationCard({
             </div>
             <div className="min-w-0">
               <p className="text-[11px] uppercase tracking-[0.15em] text-charcoal/45 font-medium">
-                {rec.category}
+                {meta.label}
               </p>
               <h3 className="font-heading text-xl sm:text-2xl text-charcoal tracking-tight mt-1.5 leading-snug">
-                {rec.headline}
+                {rec.title}
               </h3>
             </div>
           </div>
-          <div className="hidden sm:flex flex-col items-end shrink-0">
-            <span className="text-xs text-charcoal/45">{rec.impactLabel}</span>
-            <span className="font-heading text-xl text-charcoal mt-0.5 whitespace-nowrap">
-              {rec.impact}
-            </span>
-          </div>
+          {impactText && (
+            <div className="hidden sm:flex flex-col items-end shrink-0">
+              <span className="text-xs text-charcoal/45">{impactLabel}</span>
+              <span className="font-heading text-xl text-charcoal mt-0.5 whitespace-nowrap">
+                {impactText}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-5 pl-0 sm:pl-14">
-          <ReportField label="Problema" value={rec.problem} />
-          <ReportField label="Causa" value={rec.cause} />
-          <ReportField label="Solución" value={rec.solution} />
+          <ReportField label="Problema" value={rec.problem ?? "—"} />
+          <ReportField label="Causa" value={rec.cause ?? "—"} />
+          <ReportField label="Solución" value={rec.solution ?? "—"} />
         </div>
 
         <div className="mt-6 sm:mt-7 pl-0 sm:pl-14 flex items-center justify-between gap-4 flex-wrap">
-          <div className="sm:hidden">
-            <span className="text-xs text-charcoal/45">{rec.impactLabel} · </span>
-            <span className="font-heading text-base text-charcoal">{rec.impact}</span>
-          </div>
+          {impactText && (
+            <div className="sm:hidden">
+              <span className="text-xs text-charcoal/45">{impactLabel} · </span>
+              <span className="font-heading text-base text-charcoal">{impactText}</span>
+            </div>
+          )}
           <div className="ml-auto">
             {applied ? (
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-700 text-sm font-medium">
