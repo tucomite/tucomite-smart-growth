@@ -83,6 +83,20 @@
   --chart-3: oklch(0.55 0.1 160);
   --chart-4: oklch(0.45 0.08 30);
   --chart-5: oklch(0.85 0.06 85);
+
+  /* TuComité — Dark app palette */
+  --tc-ink: #0B0B0D;
+  --tc-surface: #101014;
+  --tc-surface-2: #16161b;
+  --tc-elev: #1c1c22;
+  --tc-line: rgba(255,255,255,0.06);
+  --tc-line-strong: rgba(255,255,255,0.10);
+  --tc-text: #F5F1EA;
+  --tc-text-dim: rgba(245,241,234,0.65);
+  --tc-text-mute: rgba(245,241,234,0.42);
+  --tc-gold: #D4AF6E;
+  --tc-gold-light: #E8CB93;
+  --tc-gold-dark: #A88445;
 }
 
 @layer base {
