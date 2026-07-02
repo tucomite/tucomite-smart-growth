@@ -400,91 +400,143 @@ function DishDetailPage() {
           </Block>
 
           <Block icon={ShoppingBasket} eyebrow="Compras" title="Proveedores y costes">
-            {ings.length === 0 ? (
-              <p className="text-sm text-charcoal/50">Sin ingredientes vinculados.</p>
-            ) : (
-              <div className="rounded-xl border border-charcoal/10 overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-charcoal/[0.03] text-[11px] uppercase tracking-[0.12em] text-charcoal/50">
-                    <tr>
-                      <th className="text-left font-medium px-5 py-3">Ingrediente</th>
-                      <th className="text-left font-medium px-5 py-3">Proveedor actual</th>
-                      <th className="text-right font-medium px-5 py-3">Precio</th>
-                      <th className="text-left font-medium px-5 py-3">Proveedor recomendado</th>
-                      <th className="text-right font-medium px-5 py-3">Ahorro</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-charcoal/10 bg-white">
-                    {ings.map((r) => {
-                      const cur = Number(r.ingredients?.current_price ?? 0);
-                      const alt = Number(r.ingredients?.alternative_price ?? 0);
-                      const saving = alt > 0 && alt < cur ? cur - alt : 0;
-                      return (
-                        <tr key={r.ingredient_id}>
-                          <td className="px-5 py-3 text-charcoal">{r.ingredients?.name}</td>
-                          <td className="px-5 py-3 text-charcoal/70">
-                            {suppliers.get(r.ingredients?.supplier_id ?? "")?.name ?? "—"}
-                          </td>
-                          <td className="px-5 py-3 text-right text-charcoal">
-                            {currency.format(cur)}/{r.ingredients?.unit}
-                          </td>
-                          <td className="px-5 py-3 text-charcoal/70">
-                            {suppliers.get(r.ingredients?.alternative_supplier_id ?? "")?.name ?? "—"}
-                          </td>
-                          <td className="px-5 py-3 text-right">
-                            {saving > 0 ? (
-                              <span className="text-emerald-700 font-medium">
-                                −{currency.format(saving)}/{r.ingredients?.unit}
-                              </span>
-                            ) : (
-                              <span className="text-charcoal/40">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+            {ings.length === 0 && (
+              <p className="text-xs text-charcoal/50 mb-4 inline-flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--gold)]" />
+                Datos demo de desarrollo — vincula ingredientes reales desde el módulo Inventario.
+              </p>
             )}
+            <div className="rounded-xl border border-charcoal/10 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-charcoal/[0.03] text-[11px] uppercase tracking-[0.12em] text-charcoal/50">
+                  <tr>
+                    <th className="text-left font-medium px-5 py-3">Ingrediente</th>
+                    <th className="text-right font-medium px-5 py-3">Cantidad</th>
+                    <th className="text-right font-medium px-5 py-3">Coste unitario</th>
+                    <th className="text-right font-medium px-5 py-3">Coste total</th>
+                    <th className="text-left font-medium px-5 py-3">Proveedor</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-charcoal/10 bg-white">
+                  {ingredientRows.map((r, i) => (
+                    <tr key={i}>
+                      <td className="px-5 py-3 text-charcoal">{r.name}</td>
+                      <td className="px-5 py-3 text-right text-charcoal/80 tabular-nums">
+                        {r.quantity} {r.unit}
+                      </td>
+                      <td className="px-5 py-3 text-right text-charcoal/80 tabular-nums">
+                        {currency.format(r.unitPrice)}/{r.unit}
+                      </td>
+                      <td className="px-5 py-3 text-right text-charcoal font-medium tabular-nums">
+                        {currency.format(r.total)}
+                      </td>
+                      <td className="px-5 py-3 text-charcoal/70">{r.supplier}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="bg-charcoal/[0.03] border-t border-charcoal/10">
+                    <td className="px-5 py-3 text-[11px] uppercase tracking-[0.12em] text-charcoal/50" colSpan={3}>
+                      Coste total de ingredientes
+                    </td>
+                    <td className="px-5 py-3 text-right font-heading text-lg text-charcoal tabular-nums">
+                      {currency.format(ingredientRows.reduce((s, r) => s + r.total, 0))}
+                    </td>
+                    <td />
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">
+              <p className="text-xs text-charcoal/50">
+                {alternatives.length > 0
+                  ? `${alternatives.length} ingredientes tienen proveedor alternativo con mejor precio.`
+                  : "Todos los ingredientes usan el proveedor con mejor precio disponible."}
+              </p>
+              <Link
+                to="/compras"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-lg border border-charcoal/15 text-sm text-charcoal hover:border-charcoal/40 hover:bg-charcoal/[0.03] transition-colors"
+              >
+                <GitCompare className="w-4 h-4" />
+                Comparar proveedores
+              </Link>
+            </div>
           </Block>
 
           <Block icon={Megaphone} eyebrow="Marketing" title="Posicionamiento en carta">
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
-              <Field label="Nivel de popularidad" value={`${dish.popularity ?? 0}/100`} />
               <Field
-                label="Probabilidad de venta"
-                value={
-                  (dish.popularity ?? 0) >= 75
-                    ? "Alta"
-                    : (dish.popularity ?? 0) >= 45
-                      ? "Media"
-                      : "Baja"
-                }
+                label="Franja de venta óptima"
+                value={bestSlot}
+                sub={`Basado en popularidad ${popularity}/100 y patrón semanal`}
               />
               <Field
-                label="Precio recomendado"
-                value={
-                  dish.recommended_price != null
-                    ? currency.format(Number(dish.recommended_price))
-                    : "—"
-                }
+                label="Popularidad"
+                value={`${popularity}/100`}
                 sub={
-                  Number(dish.recommended_price ?? 0) > Number(dish.sale_price ?? 0)
-                    ? `Subir ${currency.format(Number(dish.recommended_price) - Number(dish.sale_price ?? 0))}`
-                    : "Mantener precio"
+                  popularity >= 70
+                    ? "En el 25% superior de la carta"
+                    : popularity >= 40
+                      ? "Rendimiento medio"
+                      : "Rotación baja — candidato a revisión"
                 }
-                emphasis={Number(dish.recommended_price ?? 0) > Number(dish.sale_price ?? 0)}
               />
               <Field
-                label="Posible promoción"
-                value={
-                  currentM >= targetM
-                    ? "Menú maridaje o combo con guarnición"
-                    : "Retirar promociones y comunicar como producto premium"
-                }
+                label="Ticket medio del plato"
+                value={currency.format(avgTicket)}
+                sub={`${monthlySales} ventas/mes × PVP actual`}
+              />
+              <Field
+                label="Probabilidad de repetición"
+                value={`${repeatProb}%`}
+                sub="Estimación a partir de popularidad y margen"
               />
             </dl>
+            <p className="mt-6 text-sm text-charcoal/75 leading-relaxed border-l-2 border-[color:var(--gold)] pl-4">
+              <span className="uppercase tracking-[0.15em] text-[11px] text-charcoal/45 block mb-1">
+                Recomendación
+              </span>
+              {marketingRecommendation}
+            </p>
+          </Block>
+
+          <Block icon={TrendingUp} eyebrow="Proyección" title="Impacto total esperado">
+            <div className="space-y-4">
+              <ImpactRow
+                label="Ingresos actuales"
+                value={currency.format(currentRevenue)}
+                sub={`${monthlySales} ventas × ${currency.format(Number(dish.sale_price ?? 0))}`}
+              />
+              <ImpactArrow />
+              <ImpactRow
+                label="Ingresos estimados"
+                value={currency.format(estimatedRevenue)}
+                sub={
+                  estimatedPrice > Number(dish.sale_price ?? 0)
+                    ? `Con PVP recomendado de ${currency.format(estimatedPrice)}`
+                    : "Manteniendo PVP actual, aplicando mejoras de coste"
+                }
+              />
+              <ImpactArrow />
+              <ImpactRow
+                label="Incremento mensual esperado"
+                value={`+${currency.format(monthlyIncrease)}`}
+                sub="Suma de subida de precio y ahorro en ingredientes"
+                emphasis
+              />
+              <ImpactArrow />
+              <ImpactRow
+                label="Recuperación de la inversión"
+                value={
+                  roiMonths == null
+                    ? "—"
+                    : roiMonths < 1
+                      ? "Menos de 1 mes"
+                      : `${Math.ceil(roiMonths)} ${Math.ceil(roiMonths) === 1 ? "mes" : "meses"}`
+                }
+                sub={`Sobre una auditoría única de ${currency.format(investment)}`}
+              />
+            </div>
           </Block>
         </div>
 
