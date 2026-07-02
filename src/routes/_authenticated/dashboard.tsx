@@ -519,36 +519,36 @@ function RecommendationCard({
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.4, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
-      className="group rounded-2xl border border-white/[0.06] bg-white/[0.025] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-200 overflow-hidden"
+      transition={{ duration: 0.35, delay: index * 0.04, ease: [0.22, 1, 0.36, 1] }}
+      className="group rounded-[20px] border border-white/[0.055] bg-gradient-to-b from-white/[0.03] to-white/[0.008] hover:border-white/[0.11] transition-all duration-200 overflow-hidden shadow-[var(--tc-shadow-sm)] hover:shadow-[var(--tc-shadow-md)]"
     >
-      <div className="p-5 sm:p-6">
+      <div className="p-7 sm:p-8">
         {/* Header row */}
-        <div className="flex items-start gap-4">
-          <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${meta.ring}`}>
-            <Icon className="w-4 h-4" />
+        <div className="flex items-start gap-5">
+          <div className={`w-10 h-10 rounded-[10px] border flex items-center justify-center shrink-0 ${meta.ring}`}>
+            <Icon className="w-4 h-4" strokeWidth={1.75} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.16em] text-white/45">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.18em] text-white/50 font-medium">
                 <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
                 {meta.label}
               </span>
-              <span className="text-white/20">·</span>
-              <span className="inline-flex items-center gap-1 text-[11.5px] text-white/50">
-                <Clock className="w-3 h-3" /> {timeLabel}
+              <span className="text-white/15">·</span>
+              <span className="inline-flex items-center gap-1.5 text-[11.5px] text-white/50">
+                <Clock className="w-3 h-3" strokeWidth={1.75} /> {timeLabel}
               </span>
             </div>
-            <h3 className="font-heading text-xl sm:text-[22px] text-white tracking-tight mt-1.5 leading-snug">
+            <h3 className="font-heading text-[22px] sm:text-[24px] text-white tracking-[-0.014em] mt-2.5 leading-[1.2]">
               {rec.title}
             </h3>
           </div>
           {impactEur > 0 && (
-            <div className="hidden sm:flex flex-col items-end shrink-0 pl-3">
-              <span className="text-[10px] uppercase tracking-[0.15em] text-white/40">
+            <div className="hidden sm:flex flex-col items-end shrink-0 pl-4">
+              <span className="text-[10px] uppercase tracking-[0.18em] text-white/45">
                 Impacto / mes
               </span>
-              <span className="font-heading text-2xl text-[color:var(--tc-gold)] tracking-tight tabular-nums mt-0.5 whitespace-nowrap">
+              <span className="font-heading text-[30px] text-[color:var(--tc-gold)] tracking-[-0.02em] tabular-nums mt-1 whitespace-nowrap leading-none">
                 <AnimatedNumber value={impactEur} format={(n) => `+${currency.format(Math.round(n))}`} />
               </span>
             </div>
@@ -556,27 +556,27 @@ function RecommendationCard({
         </div>
 
         {/* Action row */}
-        <div className="mt-5 flex items-center gap-2 flex-wrap">
+        <div className="mt-7 flex items-center gap-2 flex-wrap">
           <button
             onClick={onToggleExpand}
-            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] text-[12.5px] text-white/75 hover:text-white transition-all"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[10px] border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.14] text-[12.5px] text-white/80 hover:text-white transition-all duration-200"
           >
-            <Zap className="w-3.5 h-3.5 text-[color:var(--tc-gold)]" />
+            <Zap className="w-3.5 h-3.5 text-[color:var(--tc-gold)]" strokeWidth={1.75} />
             {expanded ? "Ocultar plan" : "Preparar plan"}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
           <div className="ml-auto flex items-center gap-2">
             {applied ? (
-              <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[12.5px] font-medium">
-                <Check className="w-3.5 h-3.5" /> Aplicada
+              <span className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-[10px] bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[12.5px] font-medium">
+                <Check className="w-3.5 h-3.5" strokeWidth={2} /> Aplicada
               </span>
             ) : (
               <button
                 onClick={onApply}
-                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-lg bg-[color:var(--tc-gold)] text-black text-[12.5px] font-semibold hover:brightness-110 transition-all shadow-[0_0_20px_-6px_rgba(212,175,110,0.5)]"
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-[10px] bg-gradient-to-b from-[color:var(--tc-gold-light)] via-[color:var(--tc-gold)] to-[color:var(--tc-gold-dark)] text-[color:var(--tc-gold-contrast)] text-[12.5px] font-semibold hover:brightness-110 active:translate-y-[0.5px] transition-all shadow-[0_0_20px_-6px_rgba(201,169,114,0.45)]"
               >
                 Aplicar
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={2} />
               </button>
             )}
           </div>
