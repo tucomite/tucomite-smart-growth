@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Logo } from "@/components/brand/Logo";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, ArrowUp, X, MessageSquare } from "lucide-react";
 

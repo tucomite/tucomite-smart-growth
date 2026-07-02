@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Logo } from "@/components/brand/Logo";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard,
