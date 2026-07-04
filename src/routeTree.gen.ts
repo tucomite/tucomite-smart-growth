@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedComprasRouteImport } from './routes/_authenticated/compras'
 import { Route as AuthenticatedComiteRouteImport } from './routes/_authenticated/comite'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
+import { Route as AuthenticatedFacturasIndexRouteImport } from './routes/_authenticated/facturas.index'
 import { Route as AuthenticatedCartaIndexRouteImport } from './routes/_authenticated/carta.index'
 import { Route as AuthenticatedCartaDishIdRouteImport } from './routes/_authenticated/carta.$dishId'
 import { Route as ApiPublicHooksCommitteeNightlyRouteImport } from './routes/api/public/hooks/committee-nightly'
@@ -85,6 +86,12 @@ const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
   path: '/ajustes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFacturasIndexRoute =
+  AuthenticatedFacturasIndexRouteImport.update({
+    id: '/facturas/',
+    path: '/facturas/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCartaIndexRoute = AuthenticatedCartaIndexRouteImport.update({
   id: '/carta/',
   path: '/carta/',
@@ -117,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
   '/carta/': typeof AuthenticatedCartaIndexRoute
+  '/facturas/': typeof AuthenticatedFacturasIndexRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +141,7 @@ export interface FileRoutesByTo {
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
   '/carta': typeof AuthenticatedCartaIndexRoute
+  '/facturas': typeof AuthenticatedFacturasIndexRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
 }
 export interface FileRoutesById {
@@ -151,6 +160,7 @@ export interface FileRoutesById {
   '/_authenticated/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/_authenticated/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
   '/_authenticated/carta/': typeof AuthenticatedCartaIndexRoute
+  '/_authenticated/facturas/': typeof AuthenticatedFacturasIndexRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
 }
 export interface FileRouteTypes {
@@ -169,6 +179,7 @@ export interface FileRouteTypes {
     | '/rentabilidad'
     | '/carta/$dishId'
     | '/carta/'
+    | '/facturas/'
     | '/api/public/hooks/committee-nightly'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/rentabilidad'
     | '/carta/$dishId'
     | '/carta'
+    | '/facturas'
     | '/api/public/hooks/committee-nightly'
   id:
     | '__root__'
@@ -202,6 +214,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rentabilidad'
     | '/_authenticated/carta/$dishId'
     | '/_authenticated/carta/'
+    | '/_authenticated/facturas/'
     | '/api/public/hooks/committee-nightly'
   fileRoutesById: FileRoutesById
 }
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAjustesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/facturas/': {
+      id: '/_authenticated/facturas/'
+      path: '/facturas'
+      fullPath: '/facturas/'
+      preLoaderRoute: typeof AuthenticatedFacturasIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/carta/': {
       id: '/_authenticated/carta/'
       path: '/carta'
@@ -334,6 +354,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRentabilidadRoute: typeof AuthenticatedRentabilidadRoute
   AuthenticatedCartaDishIdRoute: typeof AuthenticatedCartaDishIdRoute
   AuthenticatedCartaIndexRoute: typeof AuthenticatedCartaIndexRoute
+  AuthenticatedFacturasIndexRoute: typeof AuthenticatedFacturasIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -347,6 +368,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRentabilidadRoute: AuthenticatedRentabilidadRoute,
   AuthenticatedCartaDishIdRoute: AuthenticatedCartaDishIdRoute,
   AuthenticatedCartaIndexRoute: AuthenticatedCartaIndexRoute,
+  AuthenticatedFacturasIndexRoute: AuthenticatedFacturasIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
