@@ -20,7 +20,7 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const digest = await crypto.subtle.digest("SHA-256", bytes as unknown as BufferSource);
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
@@ -151,7 +151,7 @@ export const parseInvoiceDemo = createServerFn({ method: "POST" })
     await supabase
       .from("invoices")
       .update({
-        status: "parsing",
+        status: "processing",
         processing_started_at: new Date().toISOString(),
         error_code: null,
         error_message: null,
@@ -217,13 +217,15 @@ export const parseInvoiceDemo = createServerFn({ method: "POST" })
       tax_total = round2(tax_total);
       const total = round2(subtotal + tax_total);
 
-      const { error: itemsErr } = await supabase.from("invoice_items").insert(items);
+      const { error: itemsErr } = await supabase
+        .from("invoice_items")
+        .insert(items as never);
       if (itemsErr) throw itemsErr;
 
       const { error: finErr } = await supabase
         .from("invoices")
         .update({
-          status: "ready_to_apply",
+          status: "needs_review",
           processing_completed_at: new Date().toISOString(),
           ocr_provider: "demo",
           confidence_score: 95,
