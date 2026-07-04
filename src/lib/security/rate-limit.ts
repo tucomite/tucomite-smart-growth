@@ -34,6 +34,7 @@ export async function enforceRateLimit(opts: RateLimitOpts): Promise<void> {
   }
 
   if (data === false) {
+    const resetUnix = Math.floor(Date.now() / 1000) + windowSec;
     throw new Response(
       JSON.stringify({ error: "rate_limited", retry_after_sec: windowSec }),
       {
@@ -41,6 +42,9 @@ export async function enforceRateLimit(opts: RateLimitOpts): Promise<void> {
         headers: {
           "content-type": "application/json",
           "retry-after": String(windowSec),
+          "x-ratelimit-limit": String(max),
+          "x-ratelimit-remaining": "0",
+          "x-ratelimit-reset": String(resetUnix),
         },
       },
     );
