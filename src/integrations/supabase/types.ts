@@ -567,27 +567,36 @@ export type Database = {
           created_at: string
           id: string
           ingredient_id: string | null
+          invoice_item_id: string | null
           quantity: number
           reason: string | null
           restaurant_id: string
+          source_id: string | null
+          source_type: string | null
           type: string
         }
         Insert: {
           created_at?: string
           id?: string
           ingredient_id?: string | null
+          invoice_item_id?: string | null
           quantity: number
           reason?: string | null
           restaurant_id: string
+          source_id?: string | null
+          source_type?: string | null
           type: string
         }
         Update: {
           created_at?: string
           id?: string
           ingredient_id?: string | null
+          invoice_item_id?: string | null
           quantity?: number
           reason?: string | null
           restaurant_id?: string
+          source_id?: string | null
+          source_type?: string | null
           type?: string
         }
         Relationships: [
@@ -599,10 +608,270 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "inventory_movements_invoice_item_fk"
+            columns: ["invoice_item_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_items"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "inventory_movements_restaurant_id_fkey"
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_application_runs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          invoice_id: string
+          performed_by: string | null
+          restaurant_id: string
+          run_type: string
+          status: string
+          summary: Json | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          invoice_id: string
+          performed_by?: string | null
+          restaurant_id: string
+          run_type: string
+          status: string
+          summary?: Json | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          invoice_id?: string
+          performed_by?: string | null
+          restaurant_id?: string
+          run_type?: string
+          status?: string
+          summary?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_application_runs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_application_runs_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          base_quantity: number | null
+          base_unit: string | null
+          confidence_score: number | null
+          conversion_factor: number | null
+          created_at: string
+          description: string | null
+          id: string
+          ignored_reason: string | null
+          invoice_id: string
+          line_number: number | null
+          matched_ingredient_id: string | null
+          net_amount: number | null
+          package_size: number | null
+          quantity: number | null
+          raw_text: string | null
+          restaurant_id: string
+          review_status: Database["public"]["Enums"]["invoice_item_review"]
+          supplier_product_code: string | null
+          tax_amount: number | null
+          tax_rate: number | null
+          total_amount: number | null
+          unit: string | null
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          base_quantity?: number | null
+          base_unit?: string | null
+          confidence_score?: number | null
+          conversion_factor?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          ignored_reason?: string | null
+          invoice_id: string
+          line_number?: number | null
+          matched_ingredient_id?: string | null
+          net_amount?: number | null
+          package_size?: number | null
+          quantity?: number | null
+          raw_text?: string | null
+          restaurant_id: string
+          review_status?: Database["public"]["Enums"]["invoice_item_review"]
+          supplier_product_code?: string | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount?: number | null
+          unit?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          base_quantity?: number | null
+          base_unit?: string | null
+          confidence_score?: number | null
+          conversion_factor?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          ignored_reason?: string | null
+          invoice_id?: string
+          line_number?: number | null
+          matched_ingredient_id?: string | null
+          net_amount?: number | null
+          package_size?: number | null
+          quantity?: number | null
+          raw_text?: string | null
+          restaurant_id?: string
+          review_status?: Database["public"]["Enums"]["invoice_item_review"]
+          supplier_product_code?: string | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          total_amount?: number | null
+          unit?: string | null
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_matched_ingredient_id_fkey"
+            columns: ["matched_ingredient_id"]
+            isOneToOne: false
+            referencedRelation: "ingredients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          confidence_score: number | null
+          created_at: string
+          currency: string
+          error_code: string | null
+          error_message: string | null
+          file_checksum: string | null
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          ocr_mode: string
+          ocr_provider: string | null
+          processing_completed_at: string | null
+          processing_started_at: string | null
+          restaurant_id: string
+          reversed_at: string | null
+          reversed_by: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          storage_path: string
+          subtotal: number | null
+          supplier_id: string | null
+          tax_total: number | null
+          total: number | null
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string
+          error_code?: string | null
+          error_message?: string | null
+          file_checksum?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          ocr_mode?: string
+          ocr_provider?: string | null
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          restaurant_id: string
+          reversed_at?: string | null
+          reversed_by?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          storage_path: string
+          subtotal?: number | null
+          supplier_id?: string | null
+          tax_total?: number | null
+          total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string
+          error_code?: string | null
+          error_message?: string | null
+          file_checksum?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          ocr_mode?: string
+          ocr_provider?: string | null
+          processing_completed_at?: string | null
+          processing_started_at?: string | null
+          restaurant_id?: string
+          reversed_at?: string | null
+          reversed_by?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          storage_path?: string
+          subtotal?: number | null
+          supplier_id?: string | null
+          tax_total?: number | null
+          total?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -892,6 +1161,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_invoice: {
+        Args: { _invoice_id: string }
+        Returns: {
+          created_at: string
+          error_message: string | null
+          id: string
+          invoice_id: string
+          performed_by: string | null
+          restaurant_id: string
+          run_type: string
+          status: string
+          summary: Json | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invoice_application_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       backfill_snapshots_30d: { Args: { rid: string }; Returns: undefined }
       current_restaurant_id: { Args: never; Returns: string }
       has_role: {
@@ -903,9 +1192,42 @@ export type Database = {
         Returns: boolean
       }
       refresh_daily_snapshot: { Args: { rid: string }; Returns: undefined }
+      reverse_invoice: {
+        Args: { _invoice_id: string }
+        Returns: {
+          created_at: string
+          error_message: string | null
+          id: string
+          invoice_id: string
+          performed_by: string | null
+          restaurant_id: string
+          run_type: string
+          status: string
+          summary: Json | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invoice_application_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "owner" | "manager" | "kitchen" | "finance" | "staff"
+      invoice_item_review:
+        | "pending"
+        | "confirmed"
+        | "ignored"
+        | "needs_attention"
+      invoice_status:
+        | "uploaded"
+        | "processing"
+        | "needs_review"
+        | "ready_to_apply"
+        | "applied"
+        | "failed"
+        | "reversed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1034,6 +1356,21 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "manager", "kitchen", "finance", "staff"],
+      invoice_item_review: [
+        "pending",
+        "confirmed",
+        "ignored",
+        "needs_attention",
+      ],
+      invoice_status: [
+        "uploaded",
+        "processing",
+        "needs_review",
+        "ready_to_apply",
+        "applied",
+        "failed",
+        "reversed",
+      ],
     },
   },
 } as const
