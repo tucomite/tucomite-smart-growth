@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const ALLOWED_MIME = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
@@ -61,6 +62,9 @@ export const uploadInvoice = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => uploadInput.parse(raw))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // Rate limit: 10 uploads/minute per user (OCR + storage are expensive).
+    await enforceRateLimit({ key: `upload_invoice:user:${userId}`, max: 10, windowSec: 60 });
 
     if (!ALLOWED_MIME.has(data.mimeType)) {
       throw new Error(`unsupported_mime:${data.mimeType}`);
@@ -541,7 +545,11 @@ export const validateInvoiceForApply = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
+
+    // Rate limit: 20 promotions/minute per user (guards apply pipeline).
+    await enforceRateLimit({ key: `validate_apply:user:${userId}`, max: 20, windowSec: 60 });
+
     const { invoice, items } = await loadInvoiceAndItems(supabase, data.invoice_id);
 
     if (invoice.status !== "needs_review") {
