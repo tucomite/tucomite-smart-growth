@@ -958,6 +958,24 @@ export type Database = {
           },
         ]
       }
+      rate_limit_hits: {
+        Row: {
+          bucket: string
+          id: number
+          occurred_at: string
+        }
+        Insert: {
+          bucket: string
+          id?: number
+          occurred_at?: string
+        }
+        Update: {
+          bucket?: string
+          id?: number
+          occurred_at?: string
+        }
+        Relationships: []
+      }
       recommendations: {
         Row: {
           automation_mode: string | null
@@ -1182,6 +1200,10 @@ export type Database = {
         }
       }
       backfill_snapshots_30d: { Args: { rid: string }; Returns: undefined }
+      check_rate_limit: {
+        Args: { _key: string; _max: number; _window_sec: number }
+        Returns: boolean
+      }
       current_restaurant_id: { Args: never; Returns: string }
       has_role: {
         Args: {
