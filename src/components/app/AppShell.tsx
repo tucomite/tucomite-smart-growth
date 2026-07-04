@@ -86,6 +86,8 @@ export function AppShell({
 
   async function handleLogout() {
     await supabase.auth.signOut();
+    const { clearTenantCache } = await import("@/lib/tenant-cache");
+    clearTenantCache();
     toast.success("Sesión cerrada");
     navigate({ to: "/" });
   }

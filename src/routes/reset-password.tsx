@@ -80,6 +80,8 @@ function ResetPasswordPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       await supabase.auth.signOut();
+      const { clearTenantCache } = await import("@/lib/tenant-cache");
+      clearTenantCache();
       toast.success("Contraseña actualizada. Inicia sesión con la nueva.");
       navigate({ to: "/auth", search: { mode: "login", redirect: undefined } });
     } catch (err) {
