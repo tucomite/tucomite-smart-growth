@@ -51,6 +51,8 @@ function AjustesPage() {
 
   async function logout() {
     await supabase.auth.signOut();
+    const { clearTenantCache } = await import("@/lib/tenant-cache");
+    clearTenantCache();
     toast.success("Sesión cerrada");
     navigate({ to: "/" });
   }

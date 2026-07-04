@@ -111,7 +111,12 @@ function OnboardingPage() {
             <span className="font-heading text-charcoal text-sm">TuComité</span>
           </div>
           <button
-            onClick={() => supabase.auth.signOut().then(() => navigate({ to: "/" }))}
+            onClick={async () => {
+              await supabase.auth.signOut();
+              const { clearTenantCache } = await import("@/lib/tenant-cache");
+              clearTenantCache();
+              navigate({ to: "/" });
+            }}
             className="text-xs text-charcoal/50 hover:text-charcoal transition-colors"
           >
             Cerrar sesión

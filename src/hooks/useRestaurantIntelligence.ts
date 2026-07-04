@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getCachedRestaurantId, setCachedRestaurantId } from "@/lib/tenant-cache";
 
 export type Dish = {
   id: string;
@@ -105,33 +106,131 @@ function clamp(n: number) {
 }
 
 export function useRestaurantIntelligence(): Intelligence {
-  const [loading, setLoading] = useState(true);
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
-  const [restaurantName, setRestaurantName] = useState("");
-  const [userName, setUserName] = useState("");
-  const [dishes, setDishes] = useState<Dish[]>([]);
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [activity, setActivity] = useState<CommitteeActivity[]>([]);
-  const [snapshots, setSnapshots] = useState<DailySnapshot[]>([]);
+  // P2: un único objeto de estado → un solo re-render por carga (evita 6-8 setState en cascada).
+  type State = {
+    loading: boolean;
+    restaurantId: string | null;
+    restaurantName: string;
+    userName: string;
+    dishes: Dish[];
+    ingredients: Ingredient[];
+    suppliers: Supplier[];
+    recommendations: Recommendation[];
+    activity: CommitteeActivity[];
+    snapshots: DailySnapshot[];
+  };
+  const [state, setState] = useState<State>({
+    loading: true,
+    restaurantId: null,
+    restaurantName: "",
+    userName: "",
+    dishes: [],
+    ingredients: [],
+    suppliers: [],
+    recommendations: [],
+    activity: [],
+    snapshots: [],
+  });
+
+  // Refresh selectivo por tabla; evita recargar 8 queries cuando cambia sólo una.
+  const ridRef = useRef<string | null>(null);
+
+  const refetchDishes = useCallback(async (rid: string) => {
+    const { data } = await supabase
+      .from("dishes")
+      .select(
+        "id,name,category,sale_price,cost,margin,target_margin,monthly_sales,popularity,recommended_price,status",
+      )
+      .eq("restaurant_id", rid);
+    setState((s) => (s.restaurantId === rid ? { ...s, dishes: (data ?? []) as Dish[] } : s));
+  }, []);
+
+  const refetchIngredients = useCallback(async (rid: string) => {
+    const { data } = await supabase
+      .from("ingredients")
+      .select(
+        "id,name,unit,current_price,alternative_price,stock_quantity,stock_minimum,expiration_date,supplier_id,alternative_supplier_id",
+      )
+      .eq("restaurant_id", rid);
+    setState((s) =>
+      s.restaurantId === rid ? { ...s, ingredients: (data ?? []) as Ingredient[] } : s,
+    );
+  }, []);
+
+  const refetchSuppliers = useCallback(async (rid: string) => {
+    const { data } = await supabase
+      .from("suppliers")
+      .select("id,name,rating")
+      .eq("restaurant_id", rid);
+    setState((s) => (s.restaurantId === rid ? { ...s, suppliers: (data ?? []) as Supplier[] } : s));
+  }, []);
+
+  const refetchRecommendations = useCallback(async (rid: string) => {
+    const { data } = await supabase
+      .from("recommendations")
+      .select(
+        "id,title,problem,cause,solution,economic_impact,time_impact,priority,status,created_at,updated_at",
+      )
+      .eq("restaurant_id", rid)
+      .order("economic_impact", { ascending: false, nullsFirst: false });
+    setState((s) =>
+      s.restaurantId === rid
+        ? { ...s, recommendations: (data ?? []) as Recommendation[] }
+        : s,
+    );
+  }, []);
+
+  const refetchActivity = useCallback(async (rid: string) => {
+    const { data } = await supabase
+      .from("committee_activity")
+      .select("id,title,description,type,created_at")
+      .eq("restaurant_id", rid)
+      .order("created_at", { ascending: false })
+      .limit(30);
+    setState((s) =>
+      s.restaurantId === rid ? { ...s, activity: (data ?? []) as CommitteeActivity[] } : s,
+    );
+  }, []);
+
+  const refetchSnapshots = useCallback(async (rid: string) => {
+    const { data } = await supabase
+      .from("daily_snapshots")
+      .select(
+        "id,date,saved_detected,saved_applied,recs_applied,recs_pending,avg_margin,stock_value,waste_estimate",
+      )
+      .eq("restaurant_id", rid)
+      .order("date", { ascending: true })
+      .limit(60);
+    setState((s) =>
+      s.restaurantId === rid ? { ...s, snapshots: (data ?? []) as DailySnapshot[] } : s,
+    );
+  }, []);
 
   const load = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) {
-      setLoading(false);
+    const user = userData.user;
+    if (!user) {
+      setState((s) => ({ ...s, loading: false }));
       return;
     }
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, restaurant_id")
-      .eq("id", userData.user.id)
-      .maybeSingle();
-    setUserName(profile?.full_name || userData.user.email || "");
-    const rid = profile?.restaurant_id ?? null;
-    setRestaurantId(rid);
+    // Cache de tenant: si ya conocemos rid para este user, pedimos sólo full_name.
+    const cachedRid = getCachedRestaurantId(user.id);
+    const profileQuery = cachedRid
+      ? supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle()
+      : supabase
+          .from("profiles")
+          .select("full_name, restaurant_id")
+          .eq("id", user.id)
+          .maybeSingle();
+    const { data: profile } = await profileQuery;
+    const rid =
+      cachedRid ??
+      ((profile as { restaurant_id?: string | null } | null)?.restaurant_id ?? null);
+    const userName = profile?.full_name || user.email || "";
+    if (rid && !cachedRid) setCachedRestaurantId(user.id, rid);
+    ridRef.current = rid;
     if (!rid) {
-      setLoading(false);
+      setState((s) => ({ ...s, loading: false, userName, restaurantId: null }));
       return;
     }
     const [r, d, i, s, rec, act, snap] = await Promise.all([
@@ -168,62 +267,93 @@ export function useRestaurantIntelligence(): Intelligence {
           "id,date,saved_detected,saved_applied,recs_applied,recs_pending,avg_margin,stock_value,waste_estimate",
         )
         .eq("restaurant_id", rid)
-        .order("date", { ascending: true }),
+        .order("date", { ascending: true })
+        .limit(60),
     ]);
-    setRestaurantName(r.data?.name || "");
-    setDishes((d.data ?? []) as Dish[]);
-    setIngredients((i.data ?? []) as Ingredient[]);
-    setSuppliers((s.data ?? []) as Supplier[]);
-    setRecommendations((rec.data ?? []) as Recommendation[]);
-    setActivity((act.data ?? []) as CommitteeActivity[]);
-    setSnapshots((snap.data ?? []) as DailySnapshot[]);
-    setLoading(false);
+    setState({
+      loading: false,
+      restaurantId: rid,
+      restaurantName: r.data?.name || "",
+      userName,
+      dishes: (d.data ?? []) as Dish[],
+      ingredients: (i.data ?? []) as Ingredient[],
+      suppliers: (s.data ?? []) as Supplier[],
+      recommendations: (rec.data ?? []) as Recommendation[],
+      activity: (act.data ?? []) as CommitteeActivity[],
+      snapshots: (snap.data ?? []) as DailySnapshot[],
+    });
   }, []);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  // Realtime — refresh derived data whenever anything changes.
+  // Realtime — refresh selectivo con debounce (250ms) para colapsar avalanchas
+  // (p.ej. aplicar factura → N UPDATE ingredients → un solo refetch).
+  const restaurantId = state.restaurantId;
   useEffect(() => {
     if (!restaurantId) return;
+    const timers = new Map<string, ReturnType<typeof setTimeout>>();
+    const schedule = (table: string, fn: () => void) => {
+      const prev = timers.get(table);
+      if (prev) clearTimeout(prev);
+      timers.set(
+        table,
+        setTimeout(() => {
+          timers.delete(table);
+          fn();
+        }, 250),
+      );
+    };
     const channel = supabase
       .channel(`rt-${restaurantId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "recommendations", filter: `restaurant_id=eq.${restaurantId}` },
-        () => load(),
+        () => schedule("recommendations", () => refetchRecommendations(restaurantId)),
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "dishes", filter: `restaurant_id=eq.${restaurantId}` },
-        () => load(),
+        () => schedule("dishes", () => refetchDishes(restaurantId)),
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "ingredients", filter: `restaurant_id=eq.${restaurantId}` },
-        () => load(),
+        () => schedule("ingredients", () => refetchIngredients(restaurantId)),
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "suppliers", filter: `restaurant_id=eq.${restaurantId}` },
-        () => load(),
+        () => schedule("suppliers", () => refetchSuppliers(restaurantId)),
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "committee_activity", filter: `restaurant_id=eq.${restaurantId}` },
-        () => load(),
+        () => schedule("committee_activity", () => refetchActivity(restaurantId)),
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "daily_snapshots", filter: `restaurant_id=eq.${restaurantId}` },
-        () => load(),
+        () => schedule("daily_snapshots", () => refetchSnapshots(restaurantId)),
       )
       .subscribe();
     return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
       supabase.removeChannel(channel);
     };
-  }, [restaurantId, load]);
+  }, [
+    restaurantId,
+    refetchDishes,
+    refetchIngredients,
+    refetchSuppliers,
+    refetchRecommendations,
+    refetchActivity,
+    refetchSnapshots,
+  ]);
+
+  const { loading, restaurantName, userName, dishes, ingredients, suppliers, recommendations, activity, snapshots } = state;
 
   const kpis = useMemo(() => {
     const withMargin = dishes.filter((d) => d.margin != null);
