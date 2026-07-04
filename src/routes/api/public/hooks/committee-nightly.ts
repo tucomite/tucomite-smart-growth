@@ -196,7 +196,38 @@ export const Route = createFileRoute("/api/public/hooks/committee-nightly")({
           totalBriefs += 1;
         }
 
+        await recordAuditEvent({
+          event_type: "committee_nightly_completed",
+          severity: "info",
+          source: "committee_nightly",
+          actor: "cron",
+          result: "success",
+          status_code: 200,
+          duration_ms: Date.now() - started,
+          method: ctx.method,
+          endpoint: ctx.endpoint,
+          request_id: ctx.request_id,
+          correlation_id: ctx.correlation_id,
+          metadata: { mode, restaurants: restaurants.length, tasks: totalTasks, briefs: totalBriefs },
+        });
         return Response.json({ ok: true, mode, restaurants: restaurants.length, tasks: totalTasks, briefs: totalBriefs });
+        } catch (err) {
+          await recordAuditEvent({
+            event_type: "committee_nightly_failed",
+            severity: "error",
+            source: "committee_nightly",
+            actor: "cron",
+            result: "failure",
+            status_code: 500,
+            duration_ms: Date.now() - started,
+            method: ctx.method,
+            endpoint: ctx.endpoint,
+            request_id: ctx.request_id,
+            correlation_id: ctx.correlation_id,
+            metadata: { mode, message: err instanceof Error ? err.message.slice(0, 200) : "unknown" },
+          });
+          throw err;
+        }
       },
     },
   },
