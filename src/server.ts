@@ -124,16 +124,26 @@ export default {
       incoming && /^[a-zA-Z0-9._-]{8,128}$/.test(incoming)
         ? incoming
         : crypto.randomUUID();
-    const requestWithId =
-      incoming === requestId
-        ? request
-        : new Request(request, {
-            headers: (() => {
-              const h = new Headers(request.headers);
-              h.set("x-request-id", requestId);
-              return h;
-            })(),
-          });
+    let requestWithId = request;
+    if (incoming !== requestId) {
+      try {
+        const h = new Headers(request.headers);
+        h.set("x-request-id", requestId);
+        requestWithId = new Request(request.url, {
+          method: request.method,
+          headers: h,
+          body:
+            request.method === "GET" || request.method === "HEAD"
+              ? undefined
+              : request.body,
+          redirect: request.redirect,
+          // @ts-expect-error - duplex required by undici for streamed bodies
+          duplex: "half",
+        });
+      } catch {
+        requestWithId = request;
+      }
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(requestWithId, env, ctx);
