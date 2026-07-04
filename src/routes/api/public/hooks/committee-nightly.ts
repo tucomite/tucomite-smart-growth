@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyHmacRequest } from "@/lib/security/hmac";
 
 // Nightly job: run automations for every restaurant + build morning/night briefs.
 // Called by pg_cron with an apikey header. No user auth — service role.
@@ -19,6 +20,18 @@ export const Route = createFileRoute("/api/public/hooks/committee-nightly")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // --- HMAC auth (anti-replay, anti-tamper) ---
+        const secret = process.env.HOOK_HMAC_SECRET;
+        const { result, rawBody: _rawBody } = await verifyHmacRequest(request, secret);
+        if (!result.ok) {
+          console.warn("[committee-nightly] hmac_denied", { code: result.code });
+          return new Response(JSON.stringify({ error: result.code }), {
+            status: result.status,
+            headers: { "content-type": "application/json" },
+          });
+        }
+        void _rawBody;
+
         const url = new URL(request.url);
         const mode = url.searchParams.get("mode") ?? "nightly"; // nightly | morning | weekly
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
