@@ -429,7 +429,7 @@ export const matchInvoiceItemToIngredient = createServerFn({ method: "POST" })
 
     const { error: upErr } = await supabase
       .from("invoice_items")
-      .update(patch)
+      .update(patch as never)
       .eq("id", item.id);
     if (upErr) throw upErr;
     return { ok: true, invoice_item_id: item.id, matched_ingredient_id: ing.id };
