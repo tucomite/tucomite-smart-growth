@@ -489,6 +489,30 @@ export type Database = {
           },
         ]
       }
+      hmac_nonces: {
+        Row: {
+          bucket: string
+          created_at: string
+          expires_at: string
+          signature: string
+          signed_ts: number
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          expires_at: string
+          signature: string
+          signed_ts: number
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          expires_at?: string
+          signature?: string
+          signed_ts?: number
+        }
+        Relationships: []
+      }
       ingredients: {
         Row: {
           alternative_price: number | null
@@ -1202,6 +1226,15 @@ export type Database = {
       backfill_snapshots_30d: { Args: { rid: string }; Returns: undefined }
       check_rate_limit: {
         Args: { _key: string; _max: number; _window_sec: number }
+        Returns: boolean
+      }
+      claim_hmac_nonce: {
+        Args: {
+          _bucket: string
+          _signature: string
+          _signed_ts: number
+          _window_sec: number
+        }
         Returns: boolean
       }
       current_restaurant_id: { Args: never; Returns: string }
