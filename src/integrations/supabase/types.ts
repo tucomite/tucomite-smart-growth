@@ -844,6 +844,7 @@ export type Database = {
         Row: {
           applied_at: string | null
           applied_by: string | null
+          attempts: number
           confidence_score: number | null
           created_at: string
           currency: string
@@ -853,9 +854,11 @@ export type Database = {
           id: string
           invoice_date: string | null
           invoice_number: string | null
+          max_attempts: number
           ocr_mode: string
           ocr_provider: string | null
           processing_completed_at: string | null
+          processing_expires_at: string | null
           processing_started_at: string | null
           restaurant_id: string
           reversed_at: string | null
@@ -871,6 +874,7 @@ export type Database = {
         Insert: {
           applied_at?: string | null
           applied_by?: string | null
+          attempts?: number
           confidence_score?: number | null
           created_at?: string
           currency?: string
@@ -880,9 +884,11 @@ export type Database = {
           id?: string
           invoice_date?: string | null
           invoice_number?: string | null
+          max_attempts?: number
           ocr_mode?: string
           ocr_provider?: string | null
           processing_completed_at?: string | null
+          processing_expires_at?: string | null
           processing_started_at?: string | null
           restaurant_id: string
           reversed_at?: string | null
@@ -898,6 +904,7 @@ export type Database = {
         Update: {
           applied_at?: string | null
           applied_by?: string | null
+          attempts?: number
           confidence_score?: number | null
           created_at?: string
           currency?: string
@@ -907,9 +914,11 @@ export type Database = {
           id?: string
           invoice_date?: string | null
           invoice_number?: string | null
+          max_attempts?: number
           ocr_mode?: string
           ocr_provider?: string | null
           processing_completed_at?: string | null
+          processing_expires_at?: string | null
           processing_started_at?: string | null
           restaurant_id?: string
           reversed_at?: string | null
