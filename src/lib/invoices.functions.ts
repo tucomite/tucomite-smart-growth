@@ -138,7 +138,10 @@ export const parseInvoiceDemo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => parseInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
+    const { supabase, userId } = context;
+
+    // Rate limit: 5 OCR runs/minute per user (expensive pipeline).
+    await enforceRateLimit({ key: `parse_invoice:user:${userId}`, max: 5, windowSec: 60 });
 
     const { data: inv, error: invErr } = await supabase
       .from("invoices")
