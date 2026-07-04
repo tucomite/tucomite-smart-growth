@@ -35,6 +35,21 @@ export async function enforceRateLimit(opts: RateLimitOpts): Promise<void> {
 
   if (data === false) {
     const resetUnix = Math.floor(Date.now() / 1000) + windowSec;
+    // Best-effort audit (never blocks the rejection).
+    try {
+      const { recordAuditEvent } = await import("./audit");
+      await recordAuditEvent({
+        event_type: "rate_limited",
+        severity: "warning",
+        source: "rate_limit",
+        actor: "system",
+        result: "denied",
+        status_code: 429,
+        metadata: { key, max, window_sec: windowSec },
+      });
+    } catch {
+      /* swallow */
+    }
     throw new Response(
       JSON.stringify({ error: "rate_limited", retry_after_sec: windowSec }),
       {

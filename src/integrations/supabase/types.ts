@@ -17,32 +17,71 @@ export type Database = {
       audit_logs: {
         Row: {
           action: string
+          actor: string | null
+          correlation_id: string | null
           created_at: string
+          duration_ms: number | null
+          endpoint: string | null
+          event_type: string | null
           id: string
+          ip: unknown
           metadata: Json | null
+          method: string | null
           record_id: string | null
+          request_id: string | null
           restaurant_id: string | null
+          result: string | null
+          severity: string | null
+          source: string | null
+          status_code: number | null
           table_name: string | null
+          user_agent: string | null
           user_id: string | null
         }
         Insert: {
           action: string
+          actor?: string | null
+          correlation_id?: string | null
           created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          event_type?: string | null
           id?: string
+          ip?: unknown
           metadata?: Json | null
+          method?: string | null
           record_id?: string | null
+          request_id?: string | null
           restaurant_id?: string | null
+          result?: string | null
+          severity?: string | null
+          source?: string | null
+          status_code?: number | null
           table_name?: string | null
+          user_agent?: string | null
           user_id?: string | null
         }
         Update: {
           action?: string
+          actor?: string | null
+          correlation_id?: string | null
           created_at?: string
+          duration_ms?: number | null
+          endpoint?: string | null
+          event_type?: string | null
           id?: string
+          ip?: unknown
           metadata?: Json | null
+          method?: string | null
           record_id?: string | null
+          request_id?: string | null
           restaurant_id?: string | null
+          result?: string | null
+          severity?: string | null
+          source?: string | null
+          status_code?: number | null
           table_name?: string | null
+          user_agent?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -1245,6 +1284,27 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      record_audit_event: {
+        Args: {
+          _actor?: string
+          _correlation_id?: string
+          _duration_ms?: number
+          _endpoint?: string
+          _event_type: string
+          _ip?: string
+          _metadata?: Json
+          _method?: string
+          _request_id?: string
+          _restaurant_id?: string
+          _result?: string
+          _severity?: string
+          _source?: string
+          _status_code?: number
+          _user_agent?: string
+          _user_id?: string
+        }
+        Returns: string
       }
       refresh_daily_snapshot: { Args: { rid: string }; Returns: undefined }
       reverse_invoice: {

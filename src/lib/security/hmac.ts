@@ -107,15 +107,40 @@ export async function verifyHmacRequest(
     if (error) {
       // Fail-closed: if we cannot register the nonce, reject rather than allow replay.
       console.error("[hmac] nonce_rpc_failed", { bucket, error: error.message });
+      void auditHmac("hmac_denied", "replay_check_failed", bucket);
       return { result: { ok: false, status: 401, code: "replay_check_failed" }, rawBody };
     }
     if (fresh === false) {
+      void auditHmac("signature_replay", "signature_replay", bucket);
       return { result: { ok: false, status: 401, code: "signature_replay" }, rawBody };
     }
   } catch (err) {
     console.error("[hmac] nonce_unexpected", err);
+    void auditHmac("hmac_denied", "replay_check_failed", bucket);
     return { result: { ok: false, status: 401, code: "replay_check_failed" }, rawBody };
   }
 
   return { result: { ok: true }, rawBody };
+}
+
+async function auditHmac(
+  event: "hmac_denied" | "signature_replay",
+  code: string,
+  bucket: string,
+): Promise<void> {
+  try {
+    const { recordAuditEvent } = await import("./audit");
+    await recordAuditEvent({
+      event_type: event,
+      severity: "warning",
+      source: "hmac",
+      actor: "anonymous",
+      result: "denied",
+      status_code: 401,
+      endpoint: bucket,
+      metadata: { code },
+    });
+  } catch {
+    /* swallow */
+  }
 }

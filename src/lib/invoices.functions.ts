@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { recordAuditEvent } from "@/lib/security/audit";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 const ALLOWED_MIME = new Set(["application/pdf", "image/jpeg", "image/png", "image/webp"]);
@@ -155,6 +156,17 @@ export const parseInvoiceDemo = createServerFn({ method: "POST" })
     }
     if (inv.ocr_mode !== "demo") throw new Error("ocr_mode_not_demo");
 
+    const started = Date.now();
+    await recordAuditEvent({
+      event_type: "ocr_started",
+      severity: "info",
+      source: "parse_invoice_demo",
+      actor: "user",
+      result: "success",
+      user_id: userId,
+      restaurant_id: inv.restaurant_id,
+      metadata: { invoice_id: inv.id, mode: "demo" },
+    });
     await supabase
       .from("invoices")
       .update({
@@ -243,6 +255,17 @@ export const parseInvoiceDemo = createServerFn({ method: "POST" })
         .eq("id", inv.id);
       if (finErr) throw finErr;
 
+      await recordAuditEvent({
+        event_type: "ocr_completed",
+        severity: "info",
+        source: "parse_invoice_demo",
+        actor: "user",
+        result: "success",
+        user_id: userId,
+        restaurant_id: inv.restaurant_id,
+        duration_ms: Date.now() - started,
+        metadata: { invoice_id: inv.id, lines: items.length },
+      });
       return { invoice_id: inv.id, lines: items.length, subtotal, tax_total, total };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -255,6 +278,17 @@ export const parseInvoiceDemo = createServerFn({ method: "POST" })
           processing_completed_at: new Date().toISOString(),
         })
         .eq("id", inv.id);
+      await recordAuditEvent({
+        event_type: "ocr_failed",
+        severity: "error",
+        source: "parse_invoice_demo",
+        actor: "user",
+        result: "failure",
+        user_id: userId,
+        restaurant_id: inv.restaurant_id,
+        duration_ms: Date.now() - started,
+        metadata: { invoice_id: inv.id, message: msg.slice(0, 200) },
+      });
       throw err;
     }
   });
