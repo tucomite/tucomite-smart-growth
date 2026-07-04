@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/facturas/$invoiceId")({
+export const Route = createFileRoute("/_authenticated/facturas/")({
   head: () => ({ meta: [{ title: "Factura — TuComité" }] }),
   component: FacturaDetail,
 });
