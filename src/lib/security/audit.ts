@@ -72,23 +72,25 @@ export type AuditEvent = {
 export async function recordAuditEvent(evt: AuditEvent): Promise<void> {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const und = <T>(v: T | null | undefined): T | undefined =>
+      v === null || v === undefined ? undefined : v;
     const { error } = await supabaseAdmin.rpc("record_audit_event", {
       _event_type: evt.event_type,
       _severity: evt.severity ?? "info",
-      _source: evt.source ?? null,
-      _actor: evt.actor ?? null,
-      _result: evt.result ?? null,
-      _restaurant_id: evt.restaurant_id ?? null,
-      _user_id: evt.user_id ?? null,
-      _method: evt.method ?? null,
-      _endpoint: evt.endpoint ?? null,
-      _status_code: evt.status_code ?? null,
-      _duration_ms: evt.duration_ms ?? null,
-      _ip: evt.ip ?? null,
-      _user_agent: evt.user_agent ?? null,
-      _request_id: evt.request_id ?? null,
-      _correlation_id: evt.correlation_id ?? null,
-      _metadata: (evt.metadata ?? null) as never,
+      _source: und(evt.source),
+      _actor: und(evt.actor),
+      _result: und(evt.result),
+      _restaurant_id: und(evt.restaurant_id),
+      _user_id: und(evt.user_id),
+      _method: und(evt.method),
+      _endpoint: und(evt.endpoint),
+      _status_code: und(evt.status_code),
+      _duration_ms: und(evt.duration_ms),
+      _ip: und(evt.ip),
+      _user_agent: und(evt.user_agent),
+      _request_id: und(evt.request_id),
+      _correlation_id: und(evt.correlation_id),
+      _metadata: (evt.metadata ?? undefined) as never,
     });
     if (error) {
       // Structured warning only — no payloads, no secrets.
