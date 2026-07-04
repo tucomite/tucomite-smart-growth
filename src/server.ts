@@ -26,6 +26,23 @@ async function getServerEntry(): Promise<ServerEntry> {
 const SUPABASE_ORIGIN = "https://aucrkwihamwonzudlofs.supabase.co";
 const LOVABLE_ORIGIN = "https://lovable.dev https://*.lovable.app https://*.lovable.dev";
 
+// Content-Security-Policy — OWASP hardening.
+//
+// NOTE on `script-src 'unsafe-inline'`:
+//   TanStack Start injects an inline hydration script into the SSR HTML.
+//   Per MDN, the ideal replacement is a per-response `nonce-<random>` or a
+//   sha256 hash of the exact hydration payload. The current SSR plugin does
+//   not expose a hook to inject that nonce/hash. We accept `'unsafe-inline'`
+//   as DOCUMENTED TECHNICAL DEBT — to be removed as soon as the framework
+//   supports nonce-based CSP. `'unsafe-eval'` remains banned.
+//
+// NOTE on framing / clickjacking:
+//   `frame-ancestors` is the source of truth (MDN: CSP wins over legacy XFO).
+//   `X-Frame-Options: SAMEORIGIN` below is kept only as a legacy fallback
+//   for pre-CSP crawlers/bots; any real change must be made in this list.
+//
+// NOTE on COEP: not applied — Google Fonts, Supabase Storage, and the
+//   Lovable preview iframe do not all serve compatible CORP headers today.
 const CSP = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' ${LOVABLE_ORIGIN}`,
@@ -40,21 +57,31 @@ const CSP = [
   "upgrade-insecure-requests",
 ].join("; ");
 
-function applySecurityHeaders(response: Response): Response {
+function applySecurityHeaders(response: Response, requestId: string): Response {
   // Never rewrite headers on non-mutable responses (e.g. redirects with bodies) —
   // clone into a fresh Response we own.
   const headers = new Headers(response.headers);
   headers.set("Content-Security-Policy", CSP);
   headers.set("X-Content-Type-Options", "nosniff");
+  // Legacy fallback only — CSP `frame-ancestors` is the source of truth.
   headers.set("X-Frame-Options", "SAMEORIGIN");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
   );
-  headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  // HSTS without `preload` on purpose: preload is irreversible for months and
+  // requires HTTPS on every subdomain of the registrable domain. Re-enable
+  // preload only after a confirmed subdomain inventory (see hstspreload.org).
+  headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
   headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  // CORP: allow same-site subresource loads (Lovable preview + custom domains
+  // typically share a registrable site). Not `same-origin` to avoid breaking
+  // asset embedding across the preview subdomain family.
+  headers.set("Cross-Origin-Resource-Policy", "same-site");
   headers.set("X-DNS-Prefetch-Control", "off");
+  // Correlation for logs/audit — safe to expose.
+  headers.set("X-Request-Id", requestId);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -90,11 +117,28 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    // Generate or propagate a stable request id for correlation across
+    // audit_logs, response headers, and server logs. Never returns a secret.
+    const incoming = request.headers.get("x-request-id");
+    const requestId =
+      incoming && /^[a-zA-Z0-9._-]{8,128}$/.test(incoming)
+        ? incoming
+        : crypto.randomUUID();
+    const requestWithId =
+      incoming === requestId
+        ? request
+        : new Request(request, {
+            headers: (() => {
+              const h = new Headers(request.headers);
+              h.set("x-request-id", requestId);
+              return h;
+            })(),
+          });
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const response = await handler.fetch(requestWithId, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);
-      return applySecurityHeaders(normalized);
+      return applySecurityHeaders(normalized, requestId);
     } catch (error) {
       console.error(error);
       return applySecurityHeaders(
@@ -102,6 +146,7 @@ export default {
           status: 500,
           headers: { "content-type": "text/html; charset=utf-8" },
         }),
+        requestId,
       );
     }
   },
