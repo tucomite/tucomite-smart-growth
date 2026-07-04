@@ -290,3 +290,284 @@ export const getInvoice = createServerFn({ method: "GET" })
 
     return { invoice, items: items ?? [] };
   });
+
+// ---------- P0.3: line review & apply-gating ----------
+
+type ItemRow = {
+  id: string;
+  invoice_id: string;
+  restaurant_id: string;
+  matched_ingredient_id: string | null;
+  base_quantity: number | null;
+  unit_price: number | null;
+  net_amount: number | null;
+  tax_amount: number | null;
+  total_amount: number | null;
+  review_status: "pending" | "confirmed" | "ignored" | "needs_attention";
+  ignored_reason: string | null;
+};
+
+async function loadItemWithInvoice(
+  supabase: import("@supabase/supabase-js").SupabaseClient,
+  itemId: string,
+) {
+  const { data: item, error } = await supabase
+    .from("invoice_items")
+    .select("*, invoices!inner(id, status, restaurant_id)")
+    .eq("id", itemId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!item) throw new Error("invoice_item_not_found");
+  return item as ItemRow & { invoices: { id: string; status: string; restaurant_id: string } };
+}
+
+function amountsLookValid(row: {
+  base_quantity: number | null;
+  unit_price: number | null;
+  net_amount: number | null;
+  total_amount: number | null;
+}): string | null {
+  if (row.base_quantity == null || Number(row.base_quantity) <= 0) return "base_quantity_invalid";
+  if (row.unit_price != null && Number(row.unit_price) < 0) return "unit_price_negative";
+  if (row.net_amount != null && Number(row.net_amount) < 0) return "net_amount_negative";
+  if (row.total_amount != null && Number(row.total_amount) < 0) return "total_amount_negative";
+  return null;
+}
+
+const confirmInput = z.object({ invoice_item_id: z.string().uuid() });
+
+export const confirmInvoiceItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => confirmInput.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const item = await loadItemWithInvoice(supabase, data.invoice_item_id);
+
+    if (item.invoices.status !== "needs_review") {
+      throw new Error(`invalid_invoice_status:${item.invoices.status}`);
+    }
+    if (!item.matched_ingredient_id) throw new Error("missing_ingredient");
+
+    const { data: ing, error: ingErr } = await supabase
+      .from("ingredients")
+      .select("id, restaurant_id")
+      .eq("id", item.matched_ingredient_id)
+      .maybeSingle();
+    if (ingErr) throw ingErr;
+    if (!ing || ing.restaurant_id !== item.restaurant_id) {
+      throw new Error("ingredient_cross_tenant");
+    }
+
+    const amountErr = amountsLookValid(item);
+    if (amountErr) throw new Error(amountErr);
+
+    const { error: upErr } = await supabase
+      .from("invoice_items")
+      .update({ review_status: "confirmed", ignored_reason: null })
+      .eq("id", item.id);
+    if (upErr) throw upErr;
+
+    return { ok: true, invoice_item_id: item.id, review_status: "confirmed" as const };
+  });
+
+const ignoreInput = z.object({
+  invoice_item_id: z.string().uuid(),
+  ignored_reason: z.string().trim().min(3).max(500),
+});
+
+export const ignoreInvoiceItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => ignoreInput.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const item = await loadItemWithInvoice(supabase, data.invoice_item_id);
+    if (item.invoices.status !== "needs_review") {
+      throw new Error(`invalid_invoice_status:${item.invoices.status}`);
+    }
+    const { error: upErr } = await supabase
+      .from("invoice_items")
+      .update({ review_status: "ignored", ignored_reason: data.ignored_reason })
+      .eq("id", item.id);
+    if (upErr) throw upErr;
+    return { ok: true, invoice_item_id: item.id, review_status: "ignored" as const };
+  });
+
+const matchInput = z.object({
+  invoice_item_id: z.string().uuid(),
+  ingredient_id: z.string().uuid(),
+  confidence_score: z.number().min(0).max(100).optional(),
+});
+
+export const matchInvoiceItemToIngredient = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => matchInput.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const item = await loadItemWithInvoice(supabase, data.invoice_item_id);
+    const invStatus = item.invoices.status;
+    if (invStatus === "applied" || invStatus === "reversed") {
+      throw new Error(`invalid_invoice_status:${invStatus}`);
+    }
+    if (invStatus !== "needs_review") {
+      throw new Error(`invalid_invoice_status:${invStatus}`);
+    }
+
+    const { data: ing, error: ingErr } = await supabase
+      .from("ingredients")
+      .select("id, restaurant_id")
+      .eq("id", data.ingredient_id)
+      .maybeSingle();
+    if (ingErr) throw ingErr;
+    if (!ing || ing.restaurant_id !== item.restaurant_id) {
+      throw new Error("ingredient_cross_tenant");
+    }
+
+    const patch: Record<string, unknown> = { matched_ingredient_id: ing.id };
+    if (data.confidence_score != null) patch.confidence_score = data.confidence_score;
+    // Re-matching resets to pending so the user re-confirms explicitly.
+    if (item.review_status !== "ignored") patch.review_status = "pending";
+
+    const { error: upErr } = await supabase
+      .from("invoice_items")
+      .update(patch)
+      .eq("id", item.id);
+    if (upErr) throw upErr;
+    return { ok: true, invoice_item_id: item.id, matched_ingredient_id: ing.id };
+  });
+
+const invoiceIdInput = z.object({ invoice_id: z.string().uuid() });
+
+async function loadInvoiceAndItems(
+  supabase: import("@supabase/supabase-js").SupabaseClient,
+  invoiceId: string,
+) {
+  const { data: inv, error: invErr } = await supabase
+    .from("invoices")
+    .select("id, restaurant_id, status, subtotal, tax_total, total")
+    .eq("id", invoiceId)
+    .maybeSingle();
+  if (invErr) throw invErr;
+  if (!inv) throw new Error("invoice_not_found");
+
+  const { data: items, error: itemsErr } = await supabase
+    .from("invoice_items")
+    .select(
+      "id, restaurant_id, matched_ingredient_id, base_quantity, unit_price, net_amount, tax_amount, total_amount, review_status, ignored_reason",
+    )
+    .eq("invoice_id", invoiceId);
+  if (itemsErr) throw itemsErr;
+  return { invoice: inv, items: (items ?? []) as ItemRow[] };
+}
+
+function computeValidation(
+  invoice: { subtotal: number | null; tax_total: number | null; total: number | null },
+  items: ItemRow[],
+) {
+  const blocking_errors: Array<{ code: string; item_id?: string; detail?: string }> = [];
+  const warnings: Array<{ code: string; item_id?: string; detail?: string }> = [];
+
+  const confirmed = items.filter((i) => i.review_status === "confirmed");
+  const ignored = items.filter((i) => i.review_status === "ignored");
+  const pending = items.filter((i) => i.review_status === "pending");
+  const needsAttn = items.filter((i) => i.review_status === "needs_attention");
+
+  if (confirmed.length === 0) blocking_errors.push({ code: "no_confirmed_lines" });
+
+  for (const it of confirmed) {
+    if (!it.matched_ingredient_id) {
+      blocking_errors.push({ code: "confirmed_missing_ingredient", item_id: it.id });
+    }
+    const amountErr = amountsLookValid(it);
+    if (amountErr) blocking_errors.push({ code: amountErr, item_id: it.id });
+  }
+
+  for (const it of pending) blocking_errors.push({ code: "line_pending", item_id: it.id });
+  for (const it of needsAttn) blocking_errors.push({ code: "line_needs_attention", item_id: it.id });
+
+  if (
+    invoice.subtotal != null &&
+    invoice.tax_total != null &&
+    invoice.total != null &&
+    Math.abs(Number(invoice.subtotal) + Number(invoice.tax_total) - Number(invoice.total)) > 0.02
+  ) {
+    blocking_errors.push({ code: "totals_mismatch" });
+  }
+
+  const confirmedNet = confirmed.reduce((s, it) => s + Number(it.net_amount ?? 0), 0);
+  if (invoice.subtotal != null && confirmed.length > 0) {
+    const diff = Math.abs(confirmedNet - Number(invoice.subtotal));
+    if (diff > 0.05 && diff / Math.max(1, Number(invoice.subtotal)) > 0.02) {
+      warnings.push({
+        code: "confirmed_net_vs_subtotal_diverges",
+        detail: diff.toFixed(2),
+      });
+    }
+  }
+
+  const affected = Array.from(
+    new Set(
+      confirmed
+        .map((i) => i.matched_ingredient_id)
+        .filter((x): x is string => typeof x === "string"),
+    ),
+  );
+
+  return {
+    confirmed_count: confirmed.length,
+    ignored_count: ignored.length,
+    pending_count: pending.length,
+    needs_attention_count: needsAttn.length,
+    blocking_errors,
+    warnings,
+    can_apply: blocking_errors.length === 0,
+    expected_movements_count: confirmed.length,
+    affected_ingredient_ids: affected,
+  };
+}
+
+export const getInvoiceValidationSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { invoice, items } = await loadInvoiceAndItems(context.supabase, data.invoice_id);
+    return {
+      invoice_id: invoice.id,
+      status: invoice.status,
+      ...computeValidation(invoice, items),
+    };
+  });
+
+export const validateInvoiceForApply = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { invoice, items } = await loadInvoiceAndItems(supabase, data.invoice_id);
+
+    if (invoice.status !== "needs_review") {
+      return {
+        promoted: false,
+        status: invoice.status,
+        ...computeValidation(invoice, items),
+        blocking_errors: [
+          { code: `invalid_invoice_status:${invoice.status}` },
+          ...computeValidation(invoice, items).blocking_errors,
+        ],
+        can_apply: false,
+      };
+    }
+
+    const summary = computeValidation(invoice, items);
+    if (!summary.can_apply) {
+      return { promoted: false, status: invoice.status, ...summary };
+    }
+
+    const { error: upErr } = await supabase
+      .from("invoices")
+      .update({ status: "ready_to_apply", error_code: null, error_message: null })
+      .eq("id", invoice.id)
+      .eq("status", "needs_review"); // guard against races
+    if (upErr) throw upErr;
+
+    return { promoted: true, status: "ready_to_apply" as const, ...summary };
+  });
