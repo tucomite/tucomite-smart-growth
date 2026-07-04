@@ -1,7 +1,8 @@
 // HMAC verification for public hooks (committee-nightly, future webhooks).
 // Header format:  x-signature: t=<unix_seconds>,v1=<hex_sha256>
 // Canonical string signed:  `${timestamp}.${rawBody}`
-// Timing-safe compare + 5-minute skew window to block replay attacks.
+// Timing-safe compare + 5-minute skew window + one-shot nonce store
+// (public.claim_hmac_nonce) to block replay attacks within the window.
 
 const DEFAULT_MAX_SKEW_SEC = 300;
 
@@ -62,7 +63,7 @@ export type HmacVerifyResult =
 export async function verifyHmacRequest(
   request: Request,
   secret: string | undefined,
-  opts: { maxSkewSec?: number } = {},
+  opts: { maxSkewSec?: number; bucket?: string } = {},
 ): Promise<{ result: HmacVerifyResult; rawBody: string }> {
   const rawBody = await request.text();
   if (!secret) {
@@ -91,5 +92,30 @@ export async function verifyHmacRequest(
   if (!gotBytes || !expBytes || !timingSafeEqual(gotBytes, expBytes)) {
     return { result: { ok: false, status: 401, code: "signature_mismatch" }, rawBody };
   }
+
+  // Anti-replay within window: reserve this exact signature as a one-shot nonce.
+  // Uses SECURITY DEFINER RPC restricted to service_role.
+  const bucket = opts.bucket ?? new URL(request.url).pathname;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: fresh, error } = await supabaseAdmin.rpc("claim_hmac_nonce", {
+      _signature: parsed.v1,
+      _bucket: bucket,
+      _signed_ts: tsNum,
+      _window_sec: maxSkew,
+    });
+    if (error) {
+      // Fail-closed: if we cannot register the nonce, reject rather than allow replay.
+      console.error("[hmac] nonce_rpc_failed", { bucket, error: error.message });
+      return { result: { ok: false, status: 401, code: "replay_check_failed" }, rawBody };
+    }
+    if (fresh === false) {
+      return { result: { ok: false, status: 401, code: "signature_replay" }, rawBody };
+    }
+  } catch (err) {
+    console.error("[hmac] nonce_unexpected", err);
+    return { result: { ok: false, status: 401, code: "replay_check_failed" }, rawBody };
+  }
+
   return { result: { ok: true }, rawBody };
 }
