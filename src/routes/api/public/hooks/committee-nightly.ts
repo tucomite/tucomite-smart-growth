@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyHmacRequest } from "@/lib/security/hmac";
+import { recordAuditEvent, auditContextFromRequest } from "@/lib/security/audit";
 
 // Nightly job: run automations for every restaurant + build morning/night briefs.
 // Called by pg_cron with an apikey header. No user auth — service role.
@@ -20,11 +21,28 @@ export const Route = createFileRoute("/api/public/hooks/committee-nightly")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const started = Date.now();
+        const ctx = auditContextFromRequest(request);
         // --- HMAC auth (anti-replay, anti-tamper) ---
         const secret = process.env.HOOK_HMAC_SECRET;
         const { result, rawBody: _rawBody } = await verifyHmacRequest(request, secret);
         if (!result.ok) {
           console.warn("[committee-nightly] hmac_denied", { code: result.code });
+          await recordAuditEvent({
+            event_type: "hmac_denied",
+            severity: "warning",
+            source: "committee_nightly",
+            actor: "anonymous",
+            result: "denied",
+            status_code: result.status,
+            method: ctx.method,
+            endpoint: ctx.endpoint,
+            ip: ctx.ip,
+            user_agent: ctx.user_agent,
+            request_id: ctx.request_id,
+            correlation_id: ctx.correlation_id,
+            metadata: { code: result.code },
+          });
           return new Response(JSON.stringify({ error: result.code }), {
             status: result.status,
             headers: { "content-type": "application/json" },
@@ -34,6 +52,20 @@ export const Route = createFileRoute("/api/public/hooks/committee-nightly")({
 
         const url = new URL(request.url);
         const mode = url.searchParams.get("mode") ?? "nightly"; // nightly | morning | weekly
+        await recordAuditEvent({
+          event_type: "committee_nightly_started",
+          severity: "info",
+          source: "committee_nightly",
+          actor: "cron",
+          result: "success",
+          method: ctx.method,
+          endpoint: ctx.endpoint,
+          ip: ctx.ip,
+          request_id: ctx.request_id,
+          correlation_id: ctx.correlation_id,
+          metadata: { mode },
+        });
+        try {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const { data: restaurants } = await supabaseAdmin
