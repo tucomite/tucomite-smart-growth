@@ -14,6 +14,7 @@ import {
   Command,
   MessageSquare,
   ChevronsUpDown,
+  FileText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -27,6 +28,7 @@ export type NavKey =
   | "carta"
   | "inventario"
   | "proveedores"
+  | "facturas"
   | "rentabilidad"
   | "comite"
   | "marketing"
@@ -37,6 +39,7 @@ const NAV: Array<{ key: NavKey; label: string; to: string; icon: typeof BookOpen
   { key: "carta", label: "Carta", to: "/carta", icon: BookOpen },
   { key: "inventario", label: "Inventario", to: "/inventario", icon: Package },
   { key: "proveedores", label: "Proveedores", to: "/compras", icon: Truck },
+  { key: "facturas", label: "Facturas", to: "/facturas", icon: FileText },
   { key: "rentabilidad", label: "Rentabilidad", to: "/rentabilidad", icon: TrendingUp },
   { key: "comite", label: "Comité IA", to: "/comite", icon: Sparkles },
   { key: "marketing", label: "Marketing", to: "/marketing", icon: Megaphone },
