@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.record_audit_event(text, text, text, text, text, uuid, uuid, text, text, integer, integer, text, text, text, text, jsonb) FROM anon, authenticated, PUBLIC;
