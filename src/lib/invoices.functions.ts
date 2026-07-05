@@ -616,3 +616,118 @@ export const validateInvoiceForApply = createServerFn({ method: "POST" })
 
     return { promoted: true, status: "ready_to_apply" as const, ...summary };
   });
+
+// ---------- P0.4: signed URL, apply, reverse, retry OCR ----------
+
+export const getInvoiceDocumentUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: inv, error } = await supabase
+      .from("invoices")
+      .select("id, storage_path, restaurant_id")
+      .eq("id", data.invoice_id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!inv) throw new Error("invoice_not_found");
+    if (!inv.storage_path || inv.storage_path === "pending") {
+      return { url: null as string | null, expires_in: 0 };
+    }
+    const { data: signed, error: sErr } = await supabase.storage
+      .from("invoices")
+      .createSignedUrl(inv.storage_path, 300);
+    if (sErr) throw sErr;
+    return { url: signed?.signedUrl ?? null, expires_in: 300 };
+  });
+
+type InvoiceRunSummary = {
+  movements_created?: number;
+  ingredients_updated?: number;
+  lines_confirmed?: number;
+  reverse_movements_created?: number;
+};
+
+type InvoiceRunResult = {
+  id: string;
+  invoice_id: string;
+  run_type: string;
+  status: string;
+  error_message: string | null;
+  summary: InvoiceRunSummary | null;
+};
+
+function normalizeRun(run: unknown): InvoiceRunResult {
+  const r = (run ?? {}) as Record<string, unknown>;
+  const raw = (r.summary ?? null) as Record<string, unknown> | null;
+  const summary: InvoiceRunSummary | null = raw
+    ? {
+        movements_created: typeof raw.movements_created === "number" ? raw.movements_created : undefined,
+        ingredients_updated: typeof raw.ingredients_updated === "number" ? raw.ingredients_updated : undefined,
+        lines_confirmed: typeof raw.lines_confirmed === "number" ? raw.lines_confirmed : undefined,
+        reverse_movements_created:
+          typeof raw.reverse_movements_created === "number" ? raw.reverse_movements_created : undefined,
+      }
+    : null;
+  return {
+    id: String(r.id ?? ""),
+    invoice_id: String(r.invoice_id ?? ""),
+    run_type: String(r.run_type ?? ""),
+    status: String(r.status ?? ""),
+    error_message: (r.error_message as string | null) ?? null,
+    summary,
+  };
+}
+
+export const applyInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
+  .handler(async ({ data, context }): Promise<InvoiceRunResult> => {
+    const { supabase, userId } = context;
+    await enforceRateLimit({ key: `apply_invoice:user:${userId}`, max: 20, windowSec: 60 });
+    const { data: run, error } = await supabase.rpc("apply_invoice", {
+      _invoice_id: data.invoice_id,
+    });
+    if (error) throw error;
+    return normalizeRun(run);
+  });
+
+export const reverseInvoice = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
+  .handler(async ({ data, context }): Promise<InvoiceRunResult> => {
+    const { supabase, userId } = context;
+    await enforceRateLimit({ key: `reverse_invoice:user:${userId}`, max: 20, windowSec: 60 });
+    const { data: run, error } = await supabase.rpc("reverse_invoice", {
+      _invoice_id: data.invoice_id,
+    });
+    if (error) throw error;
+    return normalizeRun(run);
+  });
+
+export const retryOcr = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await enforceRateLimit({ key: `retry_ocr:user:${userId}`, max: 5, windowSec: 60 });
+
+    const { data: inv, error } = await supabase
+      .from("invoices")
+      .select("id, status")
+      .eq("id", data.invoice_id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!inv) throw new Error("invoice_not_found");
+    if (inv.status !== "failed" && inv.status !== "uploaded") {
+      throw new Error(`invalid_status:${inv.status}`);
+    }
+    // Reset any leftover items from a previous failed run
+    await supabase.from("invoice_items").delete().eq("invoice_id", inv.id);
+    // Reset to uploaded so parseInvoiceDemo accepts it
+    await supabase
+      .from("invoices")
+      .update({ status: "uploaded", error_code: null, error_message: null })
+      .eq("id", inv.id);
+    return { ok: true as const, invoice_id: inv.id };
+  });

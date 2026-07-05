@@ -23,6 +23,7 @@ import { Route as AuthenticatedComiteRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedFacturasIndexRouteImport } from './routes/_authenticated/facturas.index'
 import { Route as AuthenticatedCartaIndexRouteImport } from './routes/_authenticated/carta.index'
+import { Route as AuthenticatedFacturasInvoiceIdRouteImport } from './routes/_authenticated/facturas.$invoiceId'
 import { Route as AuthenticatedCartaDishIdRouteImport } from './routes/_authenticated/carta.$dishId'
 import { Route as ApiPublicHooksCommitteeNightlyRouteImport } from './routes/api/public/hooks/committee-nightly'
 
@@ -97,6 +98,12 @@ const AuthenticatedCartaIndexRoute = AuthenticatedCartaIndexRouteImport.update({
   path: '/carta/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFacturasInvoiceIdRoute =
+  AuthenticatedFacturasInvoiceIdRouteImport.update({
+    id: '/facturas/$invoiceId',
+    path: '/facturas/$invoiceId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCartaDishIdRoute =
   AuthenticatedCartaDishIdRouteImport.update({
     id: '/carta/$dishId',
@@ -123,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
+  '/facturas/$invoiceId': typeof AuthenticatedFacturasInvoiceIdRoute
   '/carta/': typeof AuthenticatedCartaIndexRoute
   '/facturas/': typeof AuthenticatedFacturasIndexRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
@@ -140,6 +148,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
+  '/facturas/$invoiceId': typeof AuthenticatedFacturasInvoiceIdRoute
   '/carta': typeof AuthenticatedCartaIndexRoute
   '/facturas': typeof AuthenticatedFacturasIndexRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
@@ -159,6 +168,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/_authenticated/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
+  '/_authenticated/facturas/$invoiceId': typeof AuthenticatedFacturasInvoiceIdRoute
   '/_authenticated/carta/': typeof AuthenticatedCartaIndexRoute
   '/_authenticated/facturas/': typeof AuthenticatedFacturasIndexRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/rentabilidad'
     | '/carta/$dishId'
+    | '/facturas/$invoiceId'
     | '/carta/'
     | '/facturas/'
     | '/api/public/hooks/committee-nightly'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/rentabilidad'
     | '/carta/$dishId'
+    | '/facturas/$invoiceId'
     | '/carta'
     | '/facturas'
     | '/api/public/hooks/committee-nightly'
@@ -213,6 +225,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/rentabilidad'
     | '/_authenticated/carta/$dishId'
+    | '/_authenticated/facturas/$invoiceId'
     | '/_authenticated/carta/'
     | '/_authenticated/facturas/'
     | '/api/public/hooks/committee-nightly'
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCartaIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/facturas/$invoiceId': {
+      id: '/_authenticated/facturas/$invoiceId'
+      path: '/facturas/$invoiceId'
+      fullPath: '/facturas/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedFacturasInvoiceIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/carta/$dishId': {
       id: '/_authenticated/carta/$dishId'
       path: '/carta/$dishId'
@@ -353,6 +373,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRentabilidadRoute: typeof AuthenticatedRentabilidadRoute
   AuthenticatedCartaDishIdRoute: typeof AuthenticatedCartaDishIdRoute
+  AuthenticatedFacturasInvoiceIdRoute: typeof AuthenticatedFacturasInvoiceIdRoute
   AuthenticatedCartaIndexRoute: typeof AuthenticatedCartaIndexRoute
   AuthenticatedFacturasIndexRoute: typeof AuthenticatedFacturasIndexRoute
 }
@@ -367,6 +388,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRentabilidadRoute: AuthenticatedRentabilidadRoute,
   AuthenticatedCartaDishIdRoute: AuthenticatedCartaDishIdRoute,
+  AuthenticatedFacturasInvoiceIdRoute: AuthenticatedFacturasInvoiceIdRoute,
   AuthenticatedCartaIndexRoute: AuthenticatedCartaIndexRoute,
   AuthenticatedFacturasIndexRoute: AuthenticatedFacturasIndexRoute,
 }
