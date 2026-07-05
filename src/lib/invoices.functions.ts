@@ -641,46 +641,68 @@ export const getInvoiceDocumentUrl = createServerFn({ method: "POST" })
     return { url: signed?.signedUrl ?? null, expires_in: 300 };
   });
 
+type InvoiceRunSummary = {
+  movements_created?: number;
+  ingredients_updated?: number;
+  lines_confirmed?: number;
+  reverse_movements_created?: number;
+};
+
+type InvoiceRunResult = {
+  id: string;
+  invoice_id: string;
+  run_type: string;
+  status: string;
+  error_message: string | null;
+  summary: InvoiceRunSummary | null;
+};
+
+function normalizeRun(run: unknown): InvoiceRunResult {
+  const r = (run ?? {}) as Record<string, unknown>;
+  const raw = (r.summary ?? null) as Record<string, unknown> | null;
+  const summary: InvoiceRunSummary | null = raw
+    ? {
+        movements_created: typeof raw.movements_created === "number" ? raw.movements_created : undefined,
+        ingredients_updated: typeof raw.ingredients_updated === "number" ? raw.ingredients_updated : undefined,
+        lines_confirmed: typeof raw.lines_confirmed === "number" ? raw.lines_confirmed : undefined,
+        reverse_movements_created:
+          typeof raw.reverse_movements_created === "number" ? raw.reverse_movements_created : undefined,
+      }
+    : null;
+  return {
+    id: String(r.id ?? ""),
+    invoice_id: String(r.invoice_id ?? ""),
+    run_type: String(r.run_type ?? ""),
+    status: String(r.status ?? ""),
+    error_message: (r.error_message as string | null) ?? null,
+    summary,
+  };
+}
+
 export const applyInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<InvoiceRunResult> => {
     const { supabase, userId } = context;
     await enforceRateLimit({ key: `apply_invoice:user:${userId}`, max: 20, windowSec: 60 });
-
     const { data: run, error } = await supabase.rpc("apply_invoice", {
       _invoice_id: data.invoice_id,
     });
     if (error) throw error;
-    return run as {
-      id: string;
-      invoice_id: string;
-      run_type: string;
-      status: string;
-      error_message: string | null;
-      summary: Record<string, unknown> | null;
-    };
+    return normalizeRun(run);
   });
 
 export const reverseInvoice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => invoiceIdInput.parse(raw))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<InvoiceRunResult> => {
     const { supabase, userId } = context;
     await enforceRateLimit({ key: `reverse_invoice:user:${userId}`, max: 20, windowSec: 60 });
-
     const { data: run, error } = await supabase.rpc("reverse_invoice", {
       _invoice_id: data.invoice_id,
     });
     if (error) throw error;
-    return run as {
-      id: string;
-      invoice_id: string;
-      run_type: string;
-      status: string;
-      error_message: string | null;
-      summary: Record<string, unknown> | null;
-    };
+    return normalizeRun(run);
   });
 
 export const retryOcr = createServerFn({ method: "POST" })
