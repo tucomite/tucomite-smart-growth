@@ -412,9 +412,9 @@ function sanitizeName(name: string): string {
 }
 
 function PdfImporter() {
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [done, setDone] = useState(false);
 
   async function handleFile(f: File) {
     if (!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)) {
@@ -445,8 +445,8 @@ function PdfImporter() {
         original_filename: f.name,
       });
       if (insErr) throw insErr;
-      setDone(true);
-      toast.success("Carta PDF recibida correctamente.");
+      toast.success("PDF recibido. Iniciando análisis con IA…");
+      navigate({ to: "/carta/importar/$importId", params: { importId } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo subir el PDF.");
       setFile(null);
@@ -455,12 +455,10 @@ function PdfImporter() {
     }
   }
 
-  if (done && file) return <UploadReceivedPanel kind="pdf" filename={file.name} />;
-
   return (
     <FileDrop
       accept="application/pdf,.pdf"
-      hint="Sube el PDF de tu carta. Se guardará en tu bucket privado y quedará registrado como importación pendiente de análisis."
+      hint="Sube el PDF de tu carta. Se guardará en tu bucket privado y la IA extraerá los platos."
       onFile={handleFile}
       busy={uploading}
     />
@@ -473,9 +471,9 @@ const PHOTO_EXT = /\.(jpe?g|png|heic|webp)$/i;
 const PHOTO_MIME = /^image\/(jpe?g|png|heic|webp)$/i;
 
 function PhotosImporter() {
+  const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [done, setDone] = useState(false);
 
   function addFiles(list: FileList | File[]) {
     const incoming = Array.from(list);
@@ -524,17 +522,14 @@ function PhotosImporter() {
         extracted_json: { photos: uploaded },
       });
       if (insErr) throw insErr;
-      setDone(true);
-      toast.success(`${uploaded.length} fotografía(s) recibida(s).`);
+      toast.success(`${uploaded.length} fotografía(s) recibida(s). Iniciando análisis…`);
+      navigate({ to: "/carta/importar/$importId", params: { importId } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudieron subir las imágenes.");
     } finally {
       setUploading(false);
     }
   }
-
-  if (done)
-    return <UploadReceivedPanel kind="photos" filename={`${files.length} fotografía(s)`} />;
 
   return (
     <div>
