@@ -1,8 +1,39 @@
 import { Link } from "@tanstack/react-router";
-import { FileText, Table2, Camera, Sparkles, Plus } from "lucide-react";
+import { FileText, Table2, Camera, Sparkles, Plus, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
 
+type PendingImport = {
+  id: string;
+  source: string;
+  status: "uploaded" | "processing" | "needs_review" | "failed";
+  error_message: string | null;
+};
+
 export function DashboardEmptyState({ restaurantName }: { restaurantName?: string }) {
+  const [pending, setPending] = useState<PendingImport | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const { data } = await supabase
+        .from("menu_imports")
+        .select("id,source,status,error_message")
+        .in("status", ["uploaded", "processing", "needs_review", "failed"])
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (cancelled) return;
+      setPending((data?.[0] as PendingImport | undefined) ?? null);
+    }
+    load();
+    const t = setInterval(load, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, []);
+
   const primary =
     "inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-white text-[color:var(--tc-bg)] text-sm font-medium hover:bg-white/90 transition-colors";
   const ghost =
@@ -28,6 +59,8 @@ export function DashboardEmptyState({ restaurantName }: { restaurantName?: strin
           entonces no mostramos métricas ni recomendaciones inventadas: el Comité solo
           trabaja con datos reales.
         </p>
+
+        {pending && <PendingImportBanner pending={pending} />}
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link to="/carta/importar" className={primary}>
