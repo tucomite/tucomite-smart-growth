@@ -55,6 +55,7 @@ import {
   type RecAction,
 } from "@/components/app/Phase4Sections";
 import { enrichRecommendations } from "@/lib/recommendationIntel";
+import { DashboardEmptyState } from "@/components/app/DashboardEmptyState";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Centro de mando — TuComité" }] }),
@@ -96,6 +97,9 @@ const currency = new Intl.NumberFormat("es-ES", {
 function DashboardPage() {
   const ctx = useRestaurantIntelligence();
   const { loading, restaurantName, userName, recommendations, dishes, ingredients, suppliers } = ctx;
+  // Empty state: real users without a menu see an honest empty dashboard
+  // instead of any inherited seed/demo data. No metrics, no recommendations.
+  const isEmpty = !loading && dishes.length === 0;
   const [expanded, setExpanded] = useState<string | null>(null);
   const [timelineRange, setTimelineRange] = useState<TimelineRange>("semana");
   const presentation = usePresentationMode();
@@ -144,6 +148,10 @@ function DashboardPage() {
 
   async function handleRecAction(id: string, action: RecAction) {
     await updateRecStatus(id, action);
+  }
+
+  if (isEmpty) {
+    return <DashboardEmptyState restaurantName={restaurantName} />;
   }
 
   return (

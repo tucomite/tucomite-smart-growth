@@ -948,6 +948,68 @@ export type Database = {
           },
         ]
       }
+      menu_imports: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          dishes_created: number
+          error_code: string | null
+          error_message: string | null
+          extracted_json: Json | null
+          id: string
+          original_filename: string | null
+          restaurant_id: string
+          source: string
+          status: string
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          dishes_created?: number
+          error_code?: string | null
+          error_message?: string | null
+          extracted_json?: Json | null
+          id?: string
+          original_filename?: string | null
+          restaurant_id: string
+          source: string
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          dishes_created?: number
+          error_code?: string | null
+          error_message?: string | null
+          extracted_json?: Json | null
+          id?: string
+          original_filename?: string | null
+          restaurant_id?: string
+          source?: string
+          status?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_imports_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1124,6 +1186,7 @@ export type Database = {
           employees_range: string | null
           id: string
           locations_count: string | null
+          menu_imported_at: string | null
           menu_source: string | null
           name: string
           owner_id: string
@@ -1140,6 +1203,7 @@ export type Database = {
           employees_range?: string | null
           id?: string
           locations_count?: string | null
+          menu_imported_at?: string | null
           menu_source?: string | null
           name: string
           owner_id: string
@@ -1156,6 +1220,7 @@ export type Database = {
           employees_range?: string | null
           id?: string
           locations_count?: string | null
+          menu_imported_at?: string | null
           menu_source?: string | null
           name?: string
           owner_id?: string
@@ -1284,6 +1349,32 @@ export type Database = {
           _window_sec: number
         }
         Returns: boolean
+      }
+      confirm_menu_import: {
+        Args: { _import_id: string }
+        Returns: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          dishes_created: number
+          error_code: string | null
+          error_message: string | null
+          extracted_json: Json | null
+          id: string
+          original_filename: string | null
+          restaurant_id: string
+          source: string
+          status: string
+          storage_path: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "menu_imports"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       current_restaurant_id: { Args: never; Returns: string }
       has_role: {

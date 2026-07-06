@@ -87,7 +87,7 @@ function OnboardingPage() {
         .eq("id", userData.user.id);
       if (profErr) throw profErr;
       toast.success("Tu comité está listo");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/carta/importar" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo guardar");
     } finally {
