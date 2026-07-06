@@ -135,3 +135,64 @@ function ImportCard({
     </Link>
   );
 }
+
+function PendingImportBanner({ pending }: { pending: PendingImport }) {
+  if (pending.status === "uploaded" || pending.status === "processing") {
+    return (
+      <div className="mt-10 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 flex items-start gap-4">
+        <Loader2 className="w-5 h-5 text-white/70 animate-spin mt-0.5" />
+        <div className="flex-1">
+          <h3 className="text-white text-sm font-medium">Estamos procesando tu carta.</h3>
+          <p className="text-white/55 text-[13px] mt-1 leading-relaxed">
+            La IA está extrayendo los platos de tu {pending.source === "pdf" ? "PDF" : "fotografía(s)"}. No cierres esta pantalla.
+          </p>
+        </div>
+        <Link
+          to="/carta/importar/$importId"
+          params={{ importId: pending.id }}
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-white/10 text-xs text-white/70 hover:bg-white/[0.04] transition-colors"
+        >
+          Ver progreso <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    );
+  }
+  if (pending.status === "needs_review") {
+    return (
+      <div className="mt-10 rounded-2xl border border-emerald-400/25 bg-emerald-400/[0.04] p-6 flex items-start gap-4">
+        <Sparkles className="w-5 h-5 text-emerald-300 mt-0.5" />
+        <div className="flex-1">
+          <h3 className="text-white text-sm font-medium">Tu carta está lista para revisar.</h3>
+          <p className="text-white/60 text-[13px] mt-1 leading-relaxed">
+            Hemos detectado los platos automáticamente. Revísalos y confírmalos para completar la importación.
+          </p>
+        </div>
+        <Link
+          to="/carta/importar/$importId"
+          params={{ importId: pending.id }}
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-white text-[color:var(--tc-bg)] text-xs font-medium hover:bg-white/90 transition-colors"
+        >
+          Revisar carta <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-10 rounded-2xl border border-rose-400/25 bg-rose-400/[0.04] p-6 flex items-start gap-4">
+      <AlertTriangle className="w-5 h-5 text-rose-300 mt-0.5" />
+      <div className="flex-1">
+        <h3 className="text-white text-sm font-medium">No hemos podido procesar tu carta.</h3>
+        <p className="text-white/60 text-[13px] mt-1 leading-relaxed">
+          {pending.error_message ?? "El análisis IA no ha devuelto un resultado válido."}
+        </p>
+      </div>
+      <Link
+        to="/carta/importar/$importId"
+        params={{ importId: pending.id }}
+        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-white/15 text-xs text-white/80 hover:bg-white/[0.04] transition-colors"
+      >
+        Reintentar
+      </Link>
+    </div>
+  );
+}
