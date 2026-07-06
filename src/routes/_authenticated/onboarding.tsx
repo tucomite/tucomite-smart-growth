@@ -102,7 +102,7 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--cream)] flex flex-col">
+    <div className="tc-light min-h-screen bg-[color:var(--cream)] flex flex-col">
       {/* Top bar */}
       <header className="border-b border-charcoal/10 bg-[color:var(--cream)]/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
