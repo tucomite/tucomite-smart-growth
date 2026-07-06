@@ -46,7 +46,7 @@ export function DashboardEmptyState({ restaurantName }: { restaurantName?: strin
             desc="Sube tu hoja de cálculo con platos, categorías y precios."
           />
           <ImportCard
-            to="/carta/importar"
+            to="/carta"
             icon={<Sparkles className="w-5 h-5" />}
             title="Crear carta desde cero"
             desc="Abre el editor y añade categorías y platos uno a uno."
