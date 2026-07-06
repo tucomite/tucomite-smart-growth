@@ -645,11 +645,15 @@ function FileDrop({
   accept,
   hint,
   onFile,
+  onFiles,
+  multiple,
   busy,
 }: {
   accept: string;
   hint: string;
   onFile: (f: File) => void;
+  onFiles?: (files: FileList | File[]) => void;
+  multiple?: boolean;
   busy: boolean;
 }) {
   const [hover, setHover] = useState(false);
@@ -663,8 +667,10 @@ function FileDrop({
       onDrop={(e) => {
         e.preventDefault();
         setHover(false);
-        const f = e.dataTransfer.files?.[0];
-        if (f) onFile(f);
+        const list = e.dataTransfer.files;
+        if (!list || list.length === 0) return;
+        if (multiple && onFiles) onFiles(list);
+        else onFile(list[0]);
       }}
       className={`block rounded-2xl border-2 border-dashed p-14 text-center cursor-pointer transition-colors ${
         hover ? "border-white/40 bg-white/[0.03]" : "border-white/15 hover:border-white/30 bg-white/[0.015]"
@@ -673,11 +679,14 @@ function FileDrop({
       <input
         type="file"
         accept={accept}
+        multiple={multiple}
         className="hidden"
         disabled={busy}
         onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFile(f);
+          const list = e.target.files;
+          if (!list || list.length === 0) return;
+          if (multiple && onFiles) onFiles(list);
+          else onFile(list[0]);
         }}
       />
       {busy ? (
