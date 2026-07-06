@@ -94,10 +94,10 @@ function ImportarCartaPage() {
           <TabButton current={tab} value="scratch" onClick={() => setTab("scratch")} icon={<Sparkles className="w-4 h-4" />}>
             Crear desde cero
           </TabButton>
-          <TabButton current={tab} value="pdf" onClick={() => setTab("pdf")} icon={<FileText className="w-4 h-4" />} state="Próximamente">
+          <TabButton current={tab} value="pdf" onClick={() => setTab("pdf")} icon={<FileText className="w-4 h-4" />}>
             PDF
           </TabButton>
-          <TabButton current={tab} value="photos" onClick={() => setTab("photos")} icon={<Camera className="w-4 h-4" />} state="Próximamente">
+          <TabButton current={tab} value="photos" onClick={() => setTab("photos")} icon={<Camera className="w-4 h-4" />}>
             Fotografías
           </TabButton>
         </div>
@@ -105,8 +105,8 @@ function ImportarCartaPage() {
         <div className="mt-10">
           {tab === "excel" && <ExcelImporter />}
           {tab === "scratch" && <ScratchPanel />}
-          {tab === "pdf" && <ComingSoonPanel kind="pdf" />}
-          {tab === "photos" && <ComingSoonPanel kind="photos" />}
+          {tab === "pdf" && <PdfImporter />}
+          {tab === "photos" && <PhotosImporter />}
         </div>
       </div>
     </AppShell>
