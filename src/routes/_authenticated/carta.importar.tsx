@@ -119,14 +119,12 @@ function TabButton({
   onClick,
   icon,
   children,
-  state,
 }: {
   current: Tab;
   value: Tab;
   onClick: () => void;
   icon: React.ReactNode;
   children: React.ReactNode;
-  state?: "Próximamente";
 }) {
   const active = current === value;
   return (
@@ -138,11 +136,6 @@ function TabButton({
     >
       {icon}
       {children}
-      {state && (
-        <span className="text-[9px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-full border border-amber-400/25 text-amber-300 bg-amber-400/[0.06]">
-          {state}
-        </span>
-      )}
       {active && (
         <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-[color:var(--tc-gold)]" />
       )}
