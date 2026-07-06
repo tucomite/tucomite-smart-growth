@@ -44,28 +44,24 @@ export function DashboardEmptyState({ restaurantName }: { restaurantName?: strin
             icon={<Table2 className="w-5 h-5" />}
             title="Importar Excel o CSV"
             desc="Sube tu hoja de cálculo con platos, categorías y precios."
-            state="Disponible"
           />
           <ImportCard
-            to="/carta/importar"
+            to="/carta"
             icon={<Sparkles className="w-5 h-5" />}
             title="Crear carta desde cero"
             desc="Abre el editor y añade categorías y platos uno a uno."
-            state="Disponible"
           />
           <ImportCard
             to="/carta/importar"
             icon={<FileText className="w-5 h-5" />}
             title="Subir PDF de la carta"
-            desc="La lectura por IA está en preparación. Podrás subir el fichero, pero todavía no extraemos platos automáticamente."
-            state="Próximamente"
+            desc="Sube tu carta en PDF. Se guarda en almacenamiento privado y queda registrada para su análisis."
           />
           <ImportCard
             to="/carta/importar"
             icon={<Camera className="w-5 h-5" />}
             title="Subir fotografías"
-            desc="El OCR real de fotografías está en preparación. Sin datos válidos no generaremos platos."
-            state="Próximamente"
+            desc="Sube una o varias fotografías (jpg, png, heic, webp). Se guardan en tu bucket privado."
           />
         </div>
 
@@ -82,15 +78,12 @@ function ImportCard({
   icon,
   title,
   desc,
-  state,
 }: {
   to: string;
   icon: React.ReactNode;
   title: string;
   desc: string;
-  state: "Disponible" | "Próximamente";
 }) {
-  const available = state === "Disponible";
   return (
     <Link
       to={to}
@@ -100,14 +93,8 @@ function ImportCard({
         <div className="w-10 h-10 rounded-lg bg-white/[0.05] text-white/80 flex items-center justify-center">
           {icon}
         </div>
-        <span
-          className={`text-[10px] uppercase tracking-[0.18em] px-2 py-1 rounded-full border ${
-            available
-              ? "text-emerald-300 border-emerald-400/25 bg-emerald-400/[0.06]"
-              : "text-amber-300 border-amber-400/25 bg-amber-400/[0.06]"
-          }`}
-        >
-          {state}
+        <span className="text-[10px] uppercase tracking-[0.18em] px-2 py-1 rounded-full border text-emerald-300 border-emerald-400/25 bg-emerald-400/[0.06]">
+          Disponible
         </span>
       </div>
       <h3 className="font-heading text-lg text-white mt-5 tracking-tight">{title}</h3>

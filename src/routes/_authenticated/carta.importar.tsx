@@ -94,10 +94,10 @@ function ImportarCartaPage() {
           <TabButton current={tab} value="scratch" onClick={() => setTab("scratch")} icon={<Sparkles className="w-4 h-4" />}>
             Crear desde cero
           </TabButton>
-          <TabButton current={tab} value="pdf" onClick={() => setTab("pdf")} icon={<FileText className="w-4 h-4" />} state="Próximamente">
+          <TabButton current={tab} value="pdf" onClick={() => setTab("pdf")} icon={<FileText className="w-4 h-4" />}>
             PDF
           </TabButton>
-          <TabButton current={tab} value="photos" onClick={() => setTab("photos")} icon={<Camera className="w-4 h-4" />} state="Próximamente">
+          <TabButton current={tab} value="photos" onClick={() => setTab("photos")} icon={<Camera className="w-4 h-4" />}>
             Fotografías
           </TabButton>
         </div>
@@ -105,8 +105,8 @@ function ImportarCartaPage() {
         <div className="mt-10">
           {tab === "excel" && <ExcelImporter />}
           {tab === "scratch" && <ScratchPanel />}
-          {tab === "pdf" && <ComingSoonPanel kind="pdf" />}
-          {tab === "photos" && <ComingSoonPanel kind="photos" />}
+          {tab === "pdf" && <PdfImporter />}
+          {tab === "photos" && <PhotosImporter />}
         </div>
       </div>
     </AppShell>
@@ -119,14 +119,12 @@ function TabButton({
   onClick,
   icon,
   children,
-  state,
 }: {
   current: Tab;
   value: Tab;
   onClick: () => void;
   icon: React.ReactNode;
   children: React.ReactNode;
-  state?: "Próximamente";
 }) {
   const active = current === value;
   return (
@@ -138,11 +136,6 @@ function TabButton({
     >
       {icon}
       {children}
-      {state && (
-        <span className="text-[9px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded-full border border-amber-400/25 text-amber-300 bg-amber-400/[0.06]">
-          {state}
-        </span>
-      )}
       {active && (
         <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-[color:var(--tc-gold)]" />
       )}
@@ -399,26 +392,249 @@ function ScratchPanel() {
   );
 }
 
-/* --------------------------- Coming soon ------------------------------ */
+/* ------------------------------- PDF ---------------------------------- */
 
-function ComingSoonPanel({ kind }: { kind: "pdf" | "photos" }) {
-  const label = kind === "pdf" ? "PDF" : "Fotografías";
+async function getCurrentRestaurantId(): Promise<{ rid: string; uid: string }> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("Sesión no válida");
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("restaurant_id")
+    .eq("id", userData.user.id)
+    .maybeSingle();
+  const rid = profile?.restaurant_id;
+  if (!rid) throw new Error("Restaurante no encontrado");
+  return { rid, uid: userData.user.id };
+}
+
+function sanitizeName(name: string): string {
+  return name.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 120);
+}
+
+function PdfImporter() {
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function handleFile(f: File) {
+    if (!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)) {
+      toast.error("Solo se aceptan ficheros PDF.");
+      return;
+    }
+    if (f.size > 25 * 1024 * 1024) {
+      toast.error("El PDF supera el límite de 25 MB.");
+      return;
+    }
+    setFile(f);
+    setUploading(true);
+    try {
+      const { rid, uid } = await getCurrentRestaurantId();
+      const importId = crypto.randomUUID();
+      const path = `${rid}/pdf/${importId}/${sanitizeName(f.name)}`;
+      const { error: upErr } = await supabase.storage
+        .from("menus")
+        .upload(path, f, { contentType: "application/pdf", upsert: false });
+      if (upErr) throw upErr;
+      const { error: insErr } = await supabase.from("menu_imports").insert({
+        id: importId,
+        restaurant_id: rid,
+        created_by: uid,
+        source: "pdf",
+        status: "uploaded",
+        storage_path: path,
+        original_filename: f.name,
+      });
+      if (insErr) throw insErr;
+      setDone(true);
+      toast.success("Carta PDF recibida correctamente.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo subir el PDF.");
+      setFile(null);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  if (done && file) return <UploadReceivedPanel kind="pdf" filename={file.name} />;
+
   return (
-    <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.03] p-8">
-      <span className="text-[10px] uppercase tracking-[0.2em] text-amber-300">
-        En preparación
-      </span>
+    <FileDrop
+      accept="application/pdf,.pdf"
+      hint="Sube el PDF de tu carta. Se guardará en tu bucket privado y quedará registrado como importación pendiente de análisis."
+      onFile={handleFile}
+      busy={uploading}
+    />
+  );
+}
+
+/* --------------------------- Fotografías ------------------------------ */
+
+const PHOTO_EXT = /\.(jpe?g|png|heic|webp)$/i;
+const PHOTO_MIME = /^image\/(jpe?g|png|heic|webp)$/i;
+
+function PhotosImporter() {
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  function addFiles(list: FileList | File[]) {
+    const incoming = Array.from(list);
+    const valid: File[] = [];
+    for (const f of incoming) {
+      if (!PHOTO_MIME.test(f.type) && !PHOTO_EXT.test(f.name)) {
+        toast.error(`Formato no válido: ${f.name}`);
+        continue;
+      }
+      if (f.size > 15 * 1024 * 1024) {
+        toast.error(`Imagen supera 15 MB: ${f.name}`);
+        continue;
+      }
+      valid.push(f);
+    }
+    if (valid.length) setFiles((prev) => [...prev, ...valid]);
+  }
+
+  function removeAt(i: number) {
+    setFiles((prev) => prev.filter((_, idx) => idx !== i));
+  }
+
+  async function upload() {
+    if (files.length === 0) return;
+    setUploading(true);
+    try {
+      const { rid, uid } = await getCurrentRestaurantId();
+      const importId = crypto.randomUUID();
+      const uploaded: { path: string; name: string; size: number }[] = [];
+      for (const f of files) {
+        const path = `${rid}/photos/${importId}/${crypto.randomUUID()}-${sanitizeName(f.name)}`;
+        const { error: upErr } = await supabase.storage
+          .from("menus")
+          .upload(path, f, { contentType: f.type || "image/jpeg", upsert: false });
+        if (upErr) throw upErr;
+        uploaded.push({ path, name: f.name, size: f.size });
+      }
+      const { error: insErr } = await supabase.from("menu_imports").insert({
+        id: importId,
+        restaurant_id: rid,
+        created_by: uid,
+        source: "photos",
+        status: "uploaded",
+        storage_path: `${rid}/photos/${importId}`,
+        original_filename: files.map((f) => f.name).join(", ").slice(0, 250),
+        extracted_json: { photos: uploaded },
+      });
+      if (insErr) throw insErr;
+      setDone(true);
+      toast.success(`${uploaded.length} fotografía(s) recibida(s).`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudieron subir las imágenes.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  if (done)
+    return <UploadReceivedPanel kind="photos" filename={`${files.length} fotografía(s)`} />;
+
+  return (
+    <div>
+      <FileDrop
+        accept="image/jpeg,image/png,image/heic,image/webp,.jpg,.jpeg,.png,.heic,.webp"
+        hint="Sube una o varias fotografías de tu carta (jpg, png, heic, webp). Puedes añadir más antes de confirmar."
+        onFile={(f) => addFiles([f])}
+        onFiles={addFiles}
+        multiple
+        busy={false}
+      />
+
+      {files.length > 0 && (
+        <div className="mt-6 rounded-xl border border-white/10 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 bg-white/[0.02] border-b border-white/[0.06]">
+            <span className="text-[11px] uppercase tracking-[0.15em] text-white/50">
+              {files.length} imagen(es) seleccionada(s)
+            </span>
+            <button
+              onClick={upload}
+              disabled={uploading}
+              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-white text-[color:var(--tc-bg)] text-xs font-medium hover:bg-white/90 transition-colors disabled:opacity-40"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Subiendo…
+                </>
+              ) : (
+                <>
+                  <Check className="w-3.5 h-3.5" /> Subir {files.length} imagen(es)
+                </>
+              )}
+            </button>
+          </div>
+          <ul className="divide-y divide-white/[0.05] max-h-80 overflow-y-auto">
+            {files.map((f, i) => (
+              <li
+                key={i}
+                className="flex items-center justify-between gap-3 px-4 py-2 text-sm text-white/80"
+              >
+                <span className="truncate">{f.name}</span>
+                <span className="text-white/40 text-xs tabular-nums">
+                  {(f.size / 1024).toFixed(0)} KB
+                </span>
+                <button
+                  onClick={() => removeAt(i)}
+                  disabled={uploading}
+                  className="text-white/30 hover:text-rose-300 transition-colors"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UploadReceivedPanel({
+  kind,
+  filename,
+}: {
+  kind: "pdf" | "photos";
+  filename: string;
+}) {
+  const label = kind === "pdf" ? "Carta PDF" : "Fotografías";
+  return (
+    <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.03] p-8">
+      <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
+        <Check className="w-3.5 h-3.5" /> Recibido
+      </div>
       <h2 className="font-heading text-2xl text-white mt-4 tracking-tight">
-        Importación por {label} — próximamente
+        {label} recibida{kind === "photos" ? "s" : ""} correctamente.
       </h2>
-      <p className="text-white/65 text-sm mt-3 max-w-xl leading-relaxed">
-        La lectura por IA de {label.toLowerCase()} aún no está activada. Cuando lo esté,
-        subiremos el fichero, extraeremos platos y precios, y siempre te pediremos revisar
-        antes de confirmar. Nunca generaremos platos inventados.
+      <p className="text-white/70 text-sm mt-3 max-w-xl leading-relaxed">
+        <span className="text-white/50">Fichero:</span> {filename}
       </p>
-      <p className="text-white/45 text-xs mt-6">
-        Mientras tanto puedes importar tu carta desde Excel/CSV o crearla desde cero.
+      <p className="text-white/65 text-sm mt-4 max-w-xl leading-relaxed">
+        Estamos guardando tu carta en el almacenamiento privado del restaurante. El análisis
+        comenzará automáticamente cuando esté disponible. No se generarán platos ni
+        recomendaciones sin tu confirmación.
       </p>
+      <div className="mt-8 flex gap-3">
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-white text-[color:var(--tc-bg)] text-sm font-medium hover:bg-white/90 transition-colors"
+        >
+          Ir al dashboard
+        </Link>
+        <Link
+          to="/carta/importar"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-lg border border-white/15 text-white/80 text-sm hover:bg-white/[0.04] transition-colors"
+          reloadDocument
+        >
+          Subir otra carta
+        </Link>
+      </div>
     </div>
   );
 }
@@ -429,11 +645,15 @@ function FileDrop({
   accept,
   hint,
   onFile,
+  onFiles,
+  multiple,
   busy,
 }: {
   accept: string;
   hint: string;
   onFile: (f: File) => void;
+  onFiles?: (files: FileList | File[]) => void;
+  multiple?: boolean;
   busy: boolean;
 }) {
   const [hover, setHover] = useState(false);
@@ -447,8 +667,10 @@ function FileDrop({
       onDrop={(e) => {
         e.preventDefault();
         setHover(false);
-        const f = e.dataTransfer.files?.[0];
-        if (f) onFile(f);
+        const list = e.dataTransfer.files;
+        if (!list || list.length === 0) return;
+        if (multiple && onFiles) onFiles(list);
+        else onFile(list[0]);
       }}
       className={`block rounded-2xl border-2 border-dashed p-14 text-center cursor-pointer transition-colors ${
         hover ? "border-white/40 bg-white/[0.03]" : "border-white/15 hover:border-white/30 bg-white/[0.015]"
@@ -457,11 +679,14 @@ function FileDrop({
       <input
         type="file"
         accept={accept}
+        multiple={multiple}
         className="hidden"
         disabled={busy}
         onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFile(f);
+          const list = e.target.files;
+          if (!list || list.length === 0) return;
+          if (multiple && onFiles) onFiles(list);
+          else onFile(list[0]);
         }}
       />
       {busy ? (
