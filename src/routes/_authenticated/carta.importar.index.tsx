@@ -17,7 +17,7 @@ import {
   Plus,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/carta/importar")({
+export const Route = createFileRoute("/_authenticated/carta/importar/")({
   head: () => ({ meta: [{ title: "Importar carta — TuComité" }] }),
   component: ImportarCartaPage,
 });

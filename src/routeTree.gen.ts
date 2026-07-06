@@ -24,8 +24,8 @@ import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFacturasIndexRouteImport } from './routes/_authenticated/facturas.index'
 import { Route as AuthenticatedCartaIndexRouteImport } from './routes/_authenticated/carta.index'
 import { Route as AuthenticatedFacturasInvoiceIdRouteImport } from './routes/_authenticated/facturas.$invoiceId'
-import { Route as AuthenticatedCartaImportarRouteImport } from './routes/_authenticated/carta.importar'
 import { Route as AuthenticatedCartaDishIdRouteImport } from './routes/_authenticated/carta.$dishId'
+import { Route as AuthenticatedCartaImportarIndexRouteImport } from './routes/_authenticated/carta.importar.index'
 import { Route as ApiPublicHooksCommitteeNightlyRouteImport } from './routes/api/public/hooks/committee-nightly'
 import { Route as AuthenticatedCartaImportarImportIdRouteImport } from './routes/_authenticated/carta.importar.$importId'
 
@@ -106,16 +106,16 @@ const AuthenticatedFacturasInvoiceIdRoute =
     path: '/facturas/$invoiceId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedCartaImportarRoute =
-  AuthenticatedCartaImportarRouteImport.update({
-    id: '/carta/importar',
-    path: '/carta/importar',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedCartaDishIdRoute =
   AuthenticatedCartaDishIdRouteImport.update({
     id: '/carta/$dishId',
     path: '/carta/$dishId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCartaImportarIndexRoute =
+  AuthenticatedCartaImportarIndexRouteImport.update({
+    id: '/carta/importar/',
+    path: '/carta/importar/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const ApiPublicHooksCommitteeNightlyRoute =
@@ -126,9 +126,9 @@ const ApiPublicHooksCommitteeNightlyRoute =
   } as any)
 const AuthenticatedCartaImportarImportIdRoute =
   AuthenticatedCartaImportarImportIdRouteImport.update({
-    id: '/$importId',
-    path: '/$importId',
-    getParentRoute: () => AuthenticatedCartaImportarRoute,
+    id: '/carta/importar/$importId',
+    path: '/carta/importar/$importId',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -144,12 +144,12 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
-  '/carta/importar': typeof AuthenticatedCartaImportarRouteWithChildren
   '/facturas/$invoiceId': typeof AuthenticatedFacturasInvoiceIdRoute
   '/carta/': typeof AuthenticatedCartaIndexRoute
   '/facturas/': typeof AuthenticatedFacturasIndexRoute
   '/carta/importar/$importId': typeof AuthenticatedCartaImportarImportIdRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
+  '/carta/importar/': typeof AuthenticatedCartaImportarIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -164,12 +164,12 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
-  '/carta/importar': typeof AuthenticatedCartaImportarRouteWithChildren
   '/facturas/$invoiceId': typeof AuthenticatedFacturasInvoiceIdRoute
   '/carta': typeof AuthenticatedCartaIndexRoute
   '/facturas': typeof AuthenticatedFacturasIndexRoute
   '/carta/importar/$importId': typeof AuthenticatedCartaImportarImportIdRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
+  '/carta/importar': typeof AuthenticatedCartaImportarIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -186,12 +186,12 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/rentabilidad': typeof AuthenticatedRentabilidadRoute
   '/_authenticated/carta/$dishId': typeof AuthenticatedCartaDishIdRoute
-  '/_authenticated/carta/importar': typeof AuthenticatedCartaImportarRouteWithChildren
   '/_authenticated/facturas/$invoiceId': typeof AuthenticatedFacturasInvoiceIdRoute
   '/_authenticated/carta/': typeof AuthenticatedCartaIndexRoute
   '/_authenticated/facturas/': typeof AuthenticatedFacturasIndexRoute
   '/_authenticated/carta/importar/$importId': typeof AuthenticatedCartaImportarImportIdRoute
   '/api/public/hooks/committee-nightly': typeof ApiPublicHooksCommitteeNightlyRoute
+  '/_authenticated/carta/importar/': typeof AuthenticatedCartaImportarIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -208,12 +208,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/rentabilidad'
     | '/carta/$dishId'
-    | '/carta/importar'
     | '/facturas/$invoiceId'
     | '/carta/'
     | '/facturas/'
     | '/carta/importar/$importId'
     | '/api/public/hooks/committee-nightly'
+    | '/carta/importar/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -228,12 +228,12 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/rentabilidad'
     | '/carta/$dishId'
-    | '/carta/importar'
     | '/facturas/$invoiceId'
     | '/carta'
     | '/facturas'
     | '/carta/importar/$importId'
     | '/api/public/hooks/committee-nightly'
+    | '/carta/importar'
   id:
     | '__root__'
     | '/'
@@ -249,12 +249,12 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/rentabilidad'
     | '/_authenticated/carta/$dishId'
-    | '/_authenticated/carta/importar'
     | '/_authenticated/facturas/$invoiceId'
     | '/_authenticated/carta/'
     | '/_authenticated/facturas/'
     | '/_authenticated/carta/importar/$importId'
     | '/api/public/hooks/committee-nightly'
+    | '/_authenticated/carta/importar/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -372,18 +372,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFacturasInvoiceIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/carta/importar': {
-      id: '/_authenticated/carta/importar'
-      path: '/carta/importar'
-      fullPath: '/carta/importar'
-      preLoaderRoute: typeof AuthenticatedCartaImportarRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/carta/$dishId': {
       id: '/_authenticated/carta/$dishId'
       path: '/carta/$dishId'
       fullPath: '/carta/$dishId'
       preLoaderRoute: typeof AuthenticatedCartaDishIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/carta/importar/': {
+      id: '/_authenticated/carta/importar/'
+      path: '/carta/importar'
+      fullPath: '/carta/importar/'
+      preLoaderRoute: typeof AuthenticatedCartaImportarIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/hooks/committee-nightly': {
@@ -395,28 +395,13 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/carta/importar/$importId': {
       id: '/_authenticated/carta/importar/$importId'
-      path: '/$importId'
+      path: '/carta/importar/$importId'
       fullPath: '/carta/importar/$importId'
       preLoaderRoute: typeof AuthenticatedCartaImportarImportIdRouteImport
-      parentRoute: typeof AuthenticatedCartaImportarRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
-
-interface AuthenticatedCartaImportarRouteChildren {
-  AuthenticatedCartaImportarImportIdRoute: typeof AuthenticatedCartaImportarImportIdRoute
-}
-
-const AuthenticatedCartaImportarRouteChildren: AuthenticatedCartaImportarRouteChildren =
-  {
-    AuthenticatedCartaImportarImportIdRoute:
-      AuthenticatedCartaImportarImportIdRoute,
-  }
-
-const AuthenticatedCartaImportarRouteWithChildren =
-  AuthenticatedCartaImportarRoute._addFileChildren(
-    AuthenticatedCartaImportarRouteChildren,
-  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
@@ -428,10 +413,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedRentabilidadRoute: typeof AuthenticatedRentabilidadRoute
   AuthenticatedCartaDishIdRoute: typeof AuthenticatedCartaDishIdRoute
-  AuthenticatedCartaImportarRoute: typeof AuthenticatedCartaImportarRouteWithChildren
   AuthenticatedFacturasInvoiceIdRoute: typeof AuthenticatedFacturasInvoiceIdRoute
   AuthenticatedCartaIndexRoute: typeof AuthenticatedCartaIndexRoute
   AuthenticatedFacturasIndexRoute: typeof AuthenticatedFacturasIndexRoute
+  AuthenticatedCartaImportarImportIdRoute: typeof AuthenticatedCartaImportarImportIdRoute
+  AuthenticatedCartaImportarIndexRoute: typeof AuthenticatedCartaImportarIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -444,10 +430,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedRentabilidadRoute: AuthenticatedRentabilidadRoute,
   AuthenticatedCartaDishIdRoute: AuthenticatedCartaDishIdRoute,
-  AuthenticatedCartaImportarRoute: AuthenticatedCartaImportarRouteWithChildren,
   AuthenticatedFacturasInvoiceIdRoute: AuthenticatedFacturasInvoiceIdRoute,
   AuthenticatedCartaIndexRoute: AuthenticatedCartaIndexRoute,
   AuthenticatedFacturasIndexRoute: AuthenticatedFacturasIndexRoute,
+  AuthenticatedCartaImportarImportIdRoute:
+    AuthenticatedCartaImportarImportIdRoute,
+  AuthenticatedCartaImportarIndexRoute: AuthenticatedCartaImportarIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
