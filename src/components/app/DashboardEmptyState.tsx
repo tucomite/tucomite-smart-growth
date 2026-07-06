@@ -44,14 +44,12 @@ export function DashboardEmptyState({ restaurantName }: { restaurantName?: strin
             icon={<Table2 className="w-5 h-5" />}
             title="Importar Excel o CSV"
             desc="Sube tu hoja de cálculo con platos, categorías y precios."
-            state="Disponible"
           />
           <ImportCard
             to="/carta/importar"
             icon={<Sparkles className="w-5 h-5" />}
             title="Crear carta desde cero"
             desc="Abre el editor y añade categorías y platos uno a uno."
-            state="Disponible"
           />
           <ImportCard
             to="/carta/importar"
