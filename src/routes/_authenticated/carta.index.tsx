@@ -163,13 +163,21 @@ function CartaPage() {
               Gestiona todos los platos de tu restaurante.
             </p>
           </div>
-          <button
-            onClick={createDish}
-            disabled={creating || !restaurantId}
-            className="inline-flex items-center gap-2 bg-charcoal text-cream px-5 h-11 rounded-lg text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50"
-          >
-            <Plus className="w-4 h-4" /> Añadir plato
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/carta/importar"
+              className="inline-flex items-center gap-2 border border-charcoal/15 text-charcoal px-5 h-11 rounded-lg text-sm font-medium hover:bg-charcoal/[0.04] transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Importar carta
+            </Link>
+            <button
+              onClick={createDish}
+              disabled={creating || !restaurantId}
+              className="inline-flex items-center gap-2 bg-charcoal text-cream px-5 h-11 rounded-lg text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50"
+            >
+              <Plus className="w-4 h-4" /> Añadir plato
+            </button>
+          </div>
         </motion.header>
 
         <div className="mt-10 flex items-center gap-3">
