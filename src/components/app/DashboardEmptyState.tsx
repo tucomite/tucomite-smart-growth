@@ -1,8 +1,39 @@
 import { Link } from "@tanstack/react-router";
-import { FileText, Table2, Camera, Sparkles, Plus } from "lucide-react";
+import { FileText, Table2, Camera, Sparkles, Plus, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/app/AppShell";
 
+type PendingImport = {
+  id: string;
+  source: string;
+  status: "uploaded" | "processing" | "needs_review" | "failed";
+  error_message: string | null;
+};
+
 export function DashboardEmptyState({ restaurantName }: { restaurantName?: string }) {
+  const [pending, setPending] = useState<PendingImport | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      const { data } = await supabase
+        .from("menu_imports")
+        .select("id,source,status,error_message")
+        .in("status", ["uploaded", "processing", "needs_review", "failed"])
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (cancelled) return;
+      setPending((data?.[0] as PendingImport | undefined) ?? null);
+    }
+    load();
+    const t = setInterval(load, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, []);
+
   const primary =
     "inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-white text-[color:var(--tc-bg)] text-sm font-medium hover:bg-white/90 transition-colors";
   const ghost =
@@ -28,6 +59,8 @@ export function DashboardEmptyState({ restaurantName }: { restaurantName?: strin
           entonces no mostramos métricas ni recomendaciones inventadas: el Comité solo
           trabaja con datos reales.
         </p>
+
+        {pending && <PendingImportBanner pending={pending} />}
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link to="/carta/importar" className={primary}>
@@ -100,5 +133,66 @@ function ImportCard({
       <h3 className="font-heading text-lg text-white mt-5 tracking-tight">{title}</h3>
       <p className="text-[13px] text-white/55 mt-2 leading-relaxed">{desc}</p>
     </Link>
+  );
+}
+
+function PendingImportBanner({ pending }: { pending: PendingImport }) {
+  if (pending.status === "uploaded" || pending.status === "processing") {
+    return (
+      <div className="mt-10 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 flex items-start gap-4">
+        <Loader2 className="w-5 h-5 text-white/70 animate-spin mt-0.5" />
+        <div className="flex-1">
+          <h3 className="text-white text-sm font-medium">Estamos procesando tu carta.</h3>
+          <p className="text-white/55 text-[13px] mt-1 leading-relaxed">
+            La IA está extrayendo los platos de tu {pending.source === "pdf" ? "PDF" : "fotografía(s)"}. No cierres esta pantalla.
+          </p>
+        </div>
+        <Link
+          to="/carta/importar/$importId"
+          params={{ importId: pending.id }}
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-white/10 text-xs text-white/70 hover:bg-white/[0.04] transition-colors"
+        >
+          Ver progreso <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    );
+  }
+  if (pending.status === "needs_review") {
+    return (
+      <div className="mt-10 rounded-2xl border border-emerald-400/25 bg-emerald-400/[0.04] p-6 flex items-start gap-4">
+        <Sparkles className="w-5 h-5 text-emerald-300 mt-0.5" />
+        <div className="flex-1">
+          <h3 className="text-white text-sm font-medium">Tu carta está lista para revisar.</h3>
+          <p className="text-white/60 text-[13px] mt-1 leading-relaxed">
+            Hemos detectado los platos automáticamente. Revísalos y confírmalos para completar la importación.
+          </p>
+        </div>
+        <Link
+          to="/carta/importar/$importId"
+          params={{ importId: pending.id }}
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-white text-[color:var(--tc-bg)] text-xs font-medium hover:bg-white/90 transition-colors"
+        >
+          Revisar carta <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-10 rounded-2xl border border-rose-400/25 bg-rose-400/[0.04] p-6 flex items-start gap-4">
+      <AlertTriangle className="w-5 h-5 text-rose-300 mt-0.5" />
+      <div className="flex-1">
+        <h3 className="text-white text-sm font-medium">No hemos podido procesar tu carta.</h3>
+        <p className="text-white/60 text-[13px] mt-1 leading-relaxed">
+          {pending.error_message ?? "El análisis IA no ha devuelto un resultado válido."}
+        </p>
+      </div>
+      <Link
+        to="/carta/importar/$importId"
+        params={{ importId: pending.id }}
+        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-white/15 text-xs text-white/80 hover:bg-white/[0.04] transition-colors"
+      >
+        Reintentar
+      </Link>
+    </div>
   );
 }

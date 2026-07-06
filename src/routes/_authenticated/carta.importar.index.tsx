@@ -17,7 +17,7 @@ import {
   Plus,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/carta/importar")({
+export const Route = createFileRoute("/_authenticated/carta/importar/")({
   head: () => ({ meta: [{ title: "Importar carta — TuComité" }] }),
   component: ImportarCartaPage,
 });
@@ -412,9 +412,8 @@ function sanitizeName(name: string): string {
 }
 
 function PdfImporter() {
-  const [file, setFile] = useState<File | null>(null);
+  const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
-  const [done, setDone] = useState(false);
 
   async function handleFile(f: File) {
     if (!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)) {
@@ -425,7 +424,6 @@ function PdfImporter() {
       toast.error("El PDF supera el límite de 25 MB.");
       return;
     }
-    setFile(f);
     setUploading(true);
     try {
       const { rid, uid } = await getCurrentRestaurantId();
@@ -445,22 +443,19 @@ function PdfImporter() {
         original_filename: f.name,
       });
       if (insErr) throw insErr;
-      setDone(true);
-      toast.success("Carta PDF recibida correctamente.");
+      toast.success("PDF recibido. Iniciando análisis con IA…");
+      navigate({ to: "/carta/importar/$importId", params: { importId } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo subir el PDF.");
-      setFile(null);
     } finally {
       setUploading(false);
     }
   }
 
-  if (done && file) return <UploadReceivedPanel kind="pdf" filename={file.name} />;
-
   return (
     <FileDrop
       accept="application/pdf,.pdf"
-      hint="Sube el PDF de tu carta. Se guardará en tu bucket privado y quedará registrado como importación pendiente de análisis."
+      hint="Sube el PDF de tu carta. Se guardará en tu bucket privado y la IA extraerá los platos."
       onFile={handleFile}
       busy={uploading}
     />
@@ -473,9 +468,9 @@ const PHOTO_EXT = /\.(jpe?g|png|heic|webp)$/i;
 const PHOTO_MIME = /^image\/(jpe?g|png|heic|webp)$/i;
 
 function PhotosImporter() {
+  const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [done, setDone] = useState(false);
 
   function addFiles(list: FileList | File[]) {
     const incoming = Array.from(list);
@@ -524,17 +519,14 @@ function PhotosImporter() {
         extracted_json: { photos: uploaded },
       });
       if (insErr) throw insErr;
-      setDone(true);
-      toast.success(`${uploaded.length} fotografía(s) recibida(s).`);
+      toast.success(`${uploaded.length} fotografía(s) recibida(s). Iniciando análisis…`);
+      navigate({ to: "/carta/importar/$importId", params: { importId } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudieron subir las imágenes.");
     } finally {
       setUploading(false);
     }
   }
-
-  if (done)
-    return <UploadReceivedPanel kind="photos" filename={`${files.length} fotografía(s)`} />;
 
   return (
     <div>
@@ -592,49 +584,6 @@ function PhotosImporter() {
           </ul>
         </div>
       )}
-    </div>
-  );
-}
-
-function UploadReceivedPanel({
-  kind,
-  filename,
-}: {
-  kind: "pdf" | "photos";
-  filename: string;
-}) {
-  const label = kind === "pdf" ? "Carta PDF" : "Fotografías";
-  return (
-    <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.03] p-8">
-      <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
-        <Check className="w-3.5 h-3.5" /> Recibido
-      </div>
-      <h2 className="font-heading text-2xl text-white mt-4 tracking-tight">
-        {label} recibida{kind === "photos" ? "s" : ""} correctamente.
-      </h2>
-      <p className="text-white/70 text-sm mt-3 max-w-xl leading-relaxed">
-        <span className="text-white/50">Fichero:</span> {filename}
-      </p>
-      <p className="text-white/65 text-sm mt-4 max-w-xl leading-relaxed">
-        Estamos guardando tu carta en el almacenamiento privado del restaurante. El análisis
-        comenzará automáticamente cuando esté disponible. No se generarán platos ni
-        recomendaciones sin tu confirmación.
-      </p>
-      <div className="mt-8 flex gap-3">
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-white text-[color:var(--tc-bg)] text-sm font-medium hover:bg-white/90 transition-colors"
-        >
-          Ir al dashboard
-        </Link>
-        <Link
-          to="/carta/importar"
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-lg border border-white/15 text-white/80 text-sm hover:bg-white/[0.04] transition-colors"
-          reloadDocument
-        >
-          Subir otra carta
-        </Link>
-      </div>
     </div>
   );
 }
