@@ -413,7 +413,6 @@ function sanitizeName(name: string): string {
 
 function PdfImporter() {
   const navigate = useNavigate();
-  const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
   async function handleFile(f: File) {
@@ -425,7 +424,6 @@ function PdfImporter() {
       toast.error("El PDF supera el límite de 25 MB.");
       return;
     }
-    setFile(f);
     setUploading(true);
     try {
       const { rid, uid } = await getCurrentRestaurantId();
@@ -449,7 +447,6 @@ function PdfImporter() {
       navigate({ to: "/carta/importar/$importId", params: { importId } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo subir el PDF.");
-      setFile(null);
     } finally {
       setUploading(false);
     }
